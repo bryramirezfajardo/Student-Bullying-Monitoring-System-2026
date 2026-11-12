@@ -1,0 +1,855 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#172554">
+<title>SafeSpace | Student Reporting Portal</title>
+
+<style>
+:root {
+  --navy:#172554; --blue:#2563eb; --light:#eff6ff;
+  --bg:#f4f7fb; --text:#1e293b; --muted:#64748b;
+  --border:#e2e8f0; --red:#dc2626; --green:#15803d;
+  --white:#ffffff; --shadow:0 8px 30px rgba(15,23,42,.07);
+}
+* {box-sizing:border-box}
+body {margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--text)}
+button,input,select,textarea {font:inherit}
+button {cursor:pointer}
+.hidden {display:none!important}
+.topbar {background:var(--navy);color:white;padding:17px 5%;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand {display:flex;align-items:center;gap:12px;font-weight:800;font-size:20px}
+.brand-icon {width:42px;height:42px;display:grid;place-items:center;background:#ffffff1c;border-radius:12px;font-size:23px}
+.topbar small {color:#bfdbfe}
+.container {max-width:1050px;margin:35px auto;padding:0 18px}
+.card {background:white;padding:25px;border-radius:17px;box-shadow:var(--shadow);margin-bottom:20px}
+.auth-wrap {max-width:470px;margin:40px auto}
+h1,h2,h3 {margin-top:0}
+h2 {font-size:23px}
+h3 {font-size:17px}
+.subtitle {color:var(--muted);line-height:1.6}
+.tabs {display:flex;gap:8px;margin:20px 0}
+.tab {flex:1;padding:12px;border:1px solid var(--border);background:white;border-radius:9px;font-weight:700;color:var(--muted)}
+.tab.active {background:var(--light);border-color:var(--blue);color:var(--blue)}
+label {display:block;font-size:13px;font-weight:700;margin-bottom:7px}
+.field {margin-bottom:16px}
+input,select,textarea {width:100%;border:1px solid #cbd5e1;padding:12px;border-radius:9px;outline:none;background:white;color:var(--text)}
+input:focus,select:focus,textarea:focus {border-color:var(--blue);box-shadow:0 0 0 3px #2563eb18}
+textarea {min-height:95px;resize:vertical}
+.btn {padding:12px 17px;border:0;border-radius:9px;background:var(--blue);color:white;font-weight:700}
+.btn:hover {filter:brightness(.95)}
+.btn:disabled {opacity:.55;cursor:not-allowed}
+.btn-block {width:100%}
+.btn-secondary {background:#e2e8f0;color:#334155}
+.btn-danger {background:var(--red)}
+.btn-green {background:var(--green)}
+.small {font-size:12px;color:var(--muted)}
+.notice {background:#eff6ff;border-left:4px solid var(--blue);padding:13px;border-radius:7px;font-size:13px;line-height:1.6;margin-bottom:17px}
+.alert {background:#fef2f2;border:1px solid #fecaca;padding:15px;border-radius:10px;color:#991b1b;margin:15px 0;line-height:1.5}
+.success {background:#f0fdf4;border:1px solid #bbf7d0;padding:14px;color:#166534;border-radius:9px;margin:12px 0}
+.error {background:#fef2f2;border:1px solid #fecaca;padding:14px;color:#991b1b;border-radius:9px;margin:12px 0}
+.section-title {display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:15px}
+.grid {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px}
+.stats {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:13px;margin-bottom:20px}
+.stat {background:white;padding:20px;border-radius:13px;box-shadow:var(--shadow)}
+.stat strong {display:block;font-size:29px;margin-top:8px}
+.stat span {font-size:12px;color:var(--muted)}
+.student-card {border:1px solid var(--border);padding:18px;border-radius:12px;margin:15px 0;background:#fff}
+.student-card h3 {color:var(--navy)}
+.check-row {display:flex;align-items:flex-start;gap:10px;margin:10px 0;font-size:14px}
+.check-row input {width:auto;margin-top:3px}
+.badge {display:inline-block;padding:5px 9px;border-radius:20px;background:#e2e8f0;font-size:11px;font-weight:700}
+.badge-red {background:#fee2e2;color:#991b1b}
+.badge-green {background:#dcfce7;color:#166534}
+.badge-blue {background:#dbeafe;color:#1d4ed8}
+.table-wrap {overflow-x:auto}
+table {width:100%;border-collapse:collapse;min-width:600px}
+th,td {padding:13px;border-bottom:1px solid var(--border);text-align:left;font-size:13px}
+th {background:#f8fafc;color:#475569}
+.list-item {display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border);gap:12px;font-size:14px}
+.progress {height:7px;background:#e2e8f0;border-radius:20px;overflow:hidden;margin-top:7px}
+.progress div {height:100%;background:var(--blue)}
+.nav {display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
+.nav button {border:1px solid var(--border);background:white;border-radius:9px;padding:10px 14px;font-weight:700;color:#475569}
+.nav button.active {background:var(--navy);color:white}
+footer {text-align:center;color:var(--muted);font-size:12px;padding:30px 10px}
+hr {border:0;border-top:1px solid var(--border);margin:20px 0}
+@media(max-width:700px) {
+  .stats {grid-template-columns:repeat(2,minmax(0,1fr))}
+  .grid {grid-template-columns:1fr}
+  .container {margin:20px auto}
+  .card {padding:19px}
+  .topbar {padding:14px 18px}
+}
+@media(max-width:400px) {
+  .stats {grid-template-columns:1fr 1fr}
+  .stat {padding:14px}
+  .stat strong {font-size:23px}
+}
+</style>
+</head>
+
+<body>
+<header class="topbar">
+  <div class="brand">
+    <div class="brand-icon">🛡️</div>
+    <div>SafeSpace<br><small>Student Reporting Portal</small></div>
+  </div>
+  <div class="small" style="color:#dbeafe">GRADE 9 • PERAS</div>
+</header>
+
+<main class="container">
+
+<section id="authScreen" class="auth-wrap">
+  <div class="card">
+    <h2>Welcome to SafeSpace</h2>
+    <p class="subtitle">A confidential reporting space where students can share concerns and experiences safely.</p>
+    <div class="notice">Your submitted report will be accessible to your class adviser. Please provide truthful and accurate information.</div>
+
+    <div class="tabs">
+      <button class="tab active" id="loginTab" onclick="showAuth('login')">Student Login</button>
+      <button class="tab" id="registerTab" onclick="showAuth('register')">Register</button>
+    </div>
+
+    <div id="loginForm">
+      <div class="field">
+        <label>12-Digit LRN</label>
+        <input id="loginLRN" inputmode="numeric" maxlength="12" placeholder="Enter your LRN">
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input id="loginPassword" type="password" placeholder="Enter password">
+      </div>
+      <button class="btn btn-block" onclick="studentLogin()">Login to SafeSpace</button>
+    </div>
+
+    <div id="registerForm" class="hidden">
+      <div class="field">
+        <label>Full Name</label>
+        <input id="regName" placeholder="Enter your complete name">
+        <p class="small">Your name will be verified against the class masterlist.</p>
+      </div>
+      <div class="field">
+        <label>12-Digit LRN</label>
+        <input id="regLRN" maxlength="12" inputmode="numeric" placeholder="Enter your LRN">
+      </div>
+      <div class="grid">
+        <div class="field">
+          <label>Birthday</label>
+          <input id="regBirthday" type="date">
+        </div>
+        <div class="field">
+          <label>Age</label>
+          <input id="regAge" type="number" min="10" max="30" placeholder="Age">
+        </div>
+      </div>
+      <div class="field">
+        <label>Create Password</label>
+        <input id="regPassword" type="password" placeholder="At least 8 characters">
+      </div>
+      <div class="field">
+        <label>Confirm Password</label>
+        <input id="regConfirm" type="password" placeholder="Repeat password">
+      </div>
+      <button class="btn btn-block" onclick="registerStudent()">Submit Registration</button>
+    </div>
+    <div id="authMessage"></div>
+  </div>
+  <div style="text-align:center;margin-top:20px">
+    <button class="btn btn-secondary" onclick="showAdminLogin()">Adviser Login</button>
+  </div>
+</section>
+
+<section id="adminLoginScreen" class="auth-wrap hidden">
+  <div class="card">
+    <h2>Adviser Access</h2>
+    <p class="subtitle">Authorized class adviser only.</p>
+    <div class="field"><label>Username</label><input id="adminUsername" value="admin"></div>
+    <div class="field"><label>Administrator Password</label><input id="adminPassword" type="password"></div>
+    <button class="btn btn-block" onclick="adminLogin()">Login as Adviser</button>
+    <button class="btn btn-secondary btn-block" style="margin-top:10px" onclick="backToAuth()">Back to Student Portal</button>
+    <div id="adminLoginMessage"></div>
+  </div>
+</section>
+
+<section id="studentScreen" class="hidden">
+  <div class="section-title">
+    <div><h2 id="studentWelcome">Hello, Student!</h2><p class="subtitle">You are inside the SafeSpace student portal.</p></div>
+    <button class="btn btn-secondary" onclick="logout()">Logout</button>
+  </div>
+  <div class="card">
+    <h2>Report a Concern</h2>
+    <p class="subtitle">You may report an incident involving one or more classmates. Each reported student will have a separate incident record.</p>
+    <div class="notice">You may select up to five students in one submission. If you feel unsafe or are in immediate danger, approach a trusted adult or your adviser directly. Do not wait for an online response.</div>
+    <div class="field">
+      <label>What happened? (General description)</label>
+      <textarea id="generalNarrative" placeholder="Briefly describe your concern or experience..."></textarea>
+    </div>
+    <div class="field">
+      <label>Select classmates involved</label>
+      <input id="classmateSearch" placeholder="Search student name..." oninput="filterClassmates()">
+      <div id="classmateList" style="margin-top:10px"></div>
+      <p class="small" id="selectedCount">0 of 5 students selected</p>
+    </div>
+    <div id="individualDetails"></div>
+    <div class="alert">
+      <label class="check-row" style="color:#991b1b;font-size:14px">
+        <input type="checkbox" id="urgentAlert">
+        <span><strong>URGENT SAFETY ALERT</strong><br>I am currently experiencing a serious safety concern that needs immediate attention from my adviser.</span>
+      </label>
+      <p class="small" style="color:#991b1b">This alert is intended for urgent concerns, not ordinary reports.</p>
+    </div>
+    <button class="btn btn-block" onclick="submitIncidentReport()">Submit Confidential Report</button>
+    <div id="reportMessage"></div>
+  </div>
+</section>
+
+<section id="changePasswordScreen" class="auth-wrap hidden">
+  <div class="card">
+    <h2>Change Temporary Password</h2>
+    <p class="subtitle">You must change your temporary password before continuing.</p>
+    <div class="field"><label>Current Password</label><input id="oldPassword" type="password"></div>
+    <div class="field"><label>New Password</label><input id="newPassword" type="password"></div>
+    <div class="field"><label>Confirm New Password</label><input id="confirmNewPassword" type="password"></div>
+    <button class="btn btn-block" onclick="changePassword()">Save New Password</button>
+    <div id="changePasswordMessage"></div>
+  </div>
+</section>
+
+<section id="adminScreen" class="hidden">
+  <div class="section-title">
+    <div><h2>Adviser Dashboard</h2><p class="subtitle">SafeSpace • Grade 9 PERAS</p></div>
+    <button class="btn btn-secondary" onclick="logout()">Logout</button>
+  </div>
+  <div class="nav">
+    <button class="active" onclick="showAdminPage('overview',this)">Overview</button>
+    <button onclick="showAdminPage('reports',this)">Incident Reports</button>
+    <button onclick="showAdminPage('registrations',this)">Registrations</button>
+  </div>
+  <div id="adminOverview">
+    <div class="stats">
+      <div class="stat"><span>Total Reports</span><strong id="totalReports">0</strong></div>
+      <div class="stat"><span>Urgent Reports</span><strong id="urgentReports" style="color:#dc2626">0</strong></div>
+      <div class="stat"><span>New Reports</span><strong id="newReports">0</strong></div>
+      <div class="stat"><span>Pending Registrations</span><strong id="pendingCount">0</strong></div>
+    </div>
+    <div class="grid">
+      <div class="card">
+        <h3>Most Reported Students</h3>
+        <p class="small">Number of report entries mentioning each student. This is a monitoring indicator, not a finding of guilt.</p>
+        <div id="mostReported"></div>
+      </div>
+      <div class="card">
+        <h3>Frequent Reporters</h3>
+        <p class="small">Number of submissions made by each student. Frequent reporting may indicate a need for support.</p>
+        <div id="frequentReporters"></div>
+      </div>
+    </div>
+  </div>
+  <div id="adminReports" class="hidden">
+    <div class="card">
+      <div class="section-title"><h3>Incident Reports</h3><button class="btn btn-secondary" onclick="loadDashboard()">Refresh</button></div>
+      <div class="field"><input id="reportSearch" placeholder="Search report ID or reporter..." oninput="renderReports()"></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Report ID</th><th>Submitted</th><th>Reporter</th><th>Students</th><th>Priority</th><th>Status</th><th>Action</th></tr></thead>
+          <tbody id="reportsTable"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div id="adminRegistrations" class="hidden">
+    <div class="card">
+      <div class="section-title"><h3>Student Registration Requests</h3><button class="btn btn-secondary" onclick="loadPending()">Refresh</button></div>
+      <div id="pendingList"></div>
+    </div>
+  </div>
+</section>
+
+<section id="reportDetailScreen" class="hidden">
+  <div class="card">
+    <div class="section-title"><h2>Incident Report Details</h2><button class="btn btn-secondary" onclick="closeReportDetails()">Back</button></div>
+    <div id="reportDetailContent"></div>
+  </div>
+</section>
+
+</main>
+
+<footer><strong>SafeSpace</strong><br>Confidential Student Reporting Portal<br>Grade 9 – PERAS</footer>
+
+<script>
+/*********************************************************
+ * CONFIGURATION
+ *********************************************************/
+const API_URL = 'https://script.google.com/macros/s/AKfycbzUMNilz2ZOUE1nNemX_Q6eD7VUIlwiVJ1mBat1hIpzcQyDjUQA50Rjl-3UMvw_JkAm/exec';
+
+let token = '';
+let currentRole = '';
+let currentStudentName = '';
+let classmates = [];
+let selectedStudents = [];
+let dashboardData = null;
+
+async function api(action,data={}) {
+  if (!API_URL.startsWith('https://script.google.com/macros/s/')) {
+    throw new Error('Please configure the Apps Script Web App URL first.');
+  }
+  const response = await fetch(API_URL,{
+    method:'POST',
+    headers:{'Content-Type':'text/plain;charset=utf-8'},
+    body:JSON.stringify({action,token,...data}),
+    redirect:'follow'
+  });
+  if (!response.ok) throw new Error('Unable to connect to the server.');
+  const result = await response.json();
+  if (!result.success) throw new Error(result.message || 'Request failed.');
+  return result.data;
+}
+
+function showOnly(id) {
+  ['authScreen','adminLoginScreen','studentScreen','adminScreen','changePasswordScreen','reportDetailScreen']
+    .forEach(screen=>document.getElementById(screen).classList.toggle('hidden',screen!==id));
+}
+function message(id,text,success=false) {
+  const element=document.getElementById(id);
+  element.innerHTML='';
+  const div=document.createElement('div');
+  div.className=success?'success':'error';
+  div.textContent=text;
+  element.appendChild(div);
+}
+function clearMessage(id) {document.getElementById(id).innerHTML='';}
+function setLoading(button,loading,text='Please wait...') {
+  if (!button) return;
+  if (loading) {
+    if (!button.dataset.original) button.dataset.original=button.textContent;
+    button.disabled=true;button.textContent=text;
+  } else {
+    button.disabled=false;button.textContent=button.dataset.original||'Submit';
+    delete button.dataset.original;
+  }
+}
+function escapeHTML(value) {
+  return String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function showAuth(type) {
+  const login=type==='login';
+  document.getElementById('loginForm').classList.toggle('hidden',!login);
+  document.getElementById('registerForm').classList.toggle('hidden',login);
+  document.getElementById('loginTab').classList.toggle('active',login);
+  document.getElementById('registerTab').classList.toggle('active',!login);
+  clearMessage('authMessage');
+}
+function showAdminLogin(){showOnly('adminLoginScreen');clearMessage('adminLoginMessage');}
+function backToAuth(){showOnly('authScreen');showAuth('login');}
+
+/*********************************************************
+ * REGISTRATION
+ *********************************************************/
+async function registerStudent() {
+  const name=document.getElementById('regName').value.trim();
+  const lrn=document.getElementById('regLRN').value.trim();
+  const birthday=document.getElementById('regBirthday').value;
+  const age=Number(document.getElementById('regAge').value);
+  const password=document.getElementById('regPassword').value;
+  const confirm=document.getElementById('regConfirm').value;
+
+  if(!name||!/^\d{12}$/.test(lrn)||!birthday||!age)
+    return message('authMessage','Please complete all registration fields.');
+  if(password.length<8)return message('authMessage','Password must contain at least 8 characters.');
+  if(password!==confirm)return message('authMessage','Passwords do not match.');
+
+  const btn=document.querySelector('#registerForm button');
+  setLoading(btn,true,'Submitting...');
+  try {
+    await api('register',{fullName:name,lrn,birthday,age,password});
+    message('authMessage','Registration submitted successfully. Wait for your adviser to approve your account.',true);
+    ['regName','regLRN','regBirthday','regAge','regPassword','regConfirm'].forEach(id=>document.getElementById(id).value='');
+  } catch(error) {
+    message('authMessage',error.message);
+  } finally {setLoading(btn,false);}
+}
+
+/*********************************************************
+ * STUDENT LOGIN
+ *********************************************************/
+async function studentLogin() {
+  const lrn=document.getElementById('loginLRN').value.trim();
+  const password=document.getElementById('loginPassword').value;
+  if(!lrn||!password)return message('authMessage','Enter your LRN and password.');
+  const btn=document.querySelector('#loginForm button');
+  setLoading(btn,true,'Logging in...');
+  try {
+    const result=await api('studentLogin',{lrn,password});
+    token=result.token;currentRole='student';currentStudentName=result.name;
+    if(result.mustChangePassword){showOnly('changePasswordScreen');return;}
+    await openStudentDashboard();
+  } catch(error){message('authMessage',error.message);}
+  finally{setLoading(btn,false);}
+}
+
+async function openStudentDashboard() {
+  showOnly('studentScreen');
+  document.getElementById('studentWelcome').textContent='Hello, '+currentStudentName+'!';
+  selectedStudents=[];
+  try {
+    classmates=await api('getClassmates');
+    renderClassmates();
+  } catch(error){message('reportMessage',error.message);}
+}
+
+async function changePassword() {
+  const oldPassword=document.getElementById('oldPassword').value;
+  const newPassword=document.getElementById('newPassword').value;
+  const confirm=document.getElementById('confirmNewPassword').value;
+  if(newPassword.length<8)return message('changePasswordMessage','New password must have at least 8 characters.');
+  if(newPassword!==confirm)return message('changePasswordMessage','New passwords do not match.');
+  try {
+    const result=await api('changePassword',{oldPassword,newPassword});
+    message('changePasswordMessage',result.message||'Password changed successfully.',true);
+    token='';
+    setTimeout(()=>{showOnly('authScreen');showAuth('login');},1200);
+  } catch(error){message('changePasswordMessage',error.message);}
+}
+
+/*********************************************************
+ * ADVISER LOGIN
+ *********************************************************/
+async function adminLogin() {
+  const username=document.getElementById('adminUsername').value.trim();
+  const password=document.getElementById('adminPassword').value;
+  if(!username||!password)return message('adminLoginMessage','Enter your administrator credentials.');
+  try {
+    const result=await api('staffLogin',{username,password});
+    token=result.token;currentRole='admin';
+    showOnly('adminScreen');
+    await loadDashboard();await loadPending();
+  } catch(error){message('adminLoginMessage',error.message);}
+}
+
+/*********************************************************
+ * CLASSMATE SELECTION
+ * Updated: uses studentId, not LRN.
+ *********************************************************/
+function renderClassmates() {
+  const list=document.getElementById('classmateList');
+  list.innerHTML='';
+  const search=document.getElementById('classmateSearch').value.toLowerCase();
+  const filtered=classmates.filter(s=>String(s.name||'').toLowerCase().includes(search));
+
+  filtered.forEach(student=>{
+    const checked=selectedStudents.includes(student.studentId);
+    const label=document.createElement('label');
+    label.className='check-row';
+    label.style.padding='9px';
+    label.style.borderBottom='1px solid #e2e8f0';
+
+    const checkbox=document.createElement('input');
+    checkbox.type='checkbox';checkbox.checked=checked;
+    checkbox.addEventListener('change',()=>{
+      if(checkbox.checked){
+        if(selectedStudents.length>=5){checkbox.checked=false;alert('You may select up to five students only.');return;}
+        selectedStudents.push(student.studentId);
+      } else {
+        selectedStudents=selectedStudents.filter(id=>id!==student.studentId);
+      }
+      updateSelectedStudents();
+    });
+
+    const span=document.createElement('span');
+    span.textContent=student.name;
+    label.append(checkbox,span);
+    list.appendChild(label);
+  });
+  updateSelectedStudents();
+}
+function filterClassmates(){renderClassmates();}
+function updateSelectedStudents(){
+  document.getElementById('selectedCount').textContent=selectedStudents.length+' of 5 students selected';
+  renderIndividualDetails();
+}
+
+/*********************************************************
+ * INDIVIDUAL INCIDENT FORMS
+ *********************************************************/
+function renderIndividualDetails() {
+  const container=document.getElementById('individualDetails');
+  container.innerHTML='';
+
+  selectedStudents.forEach((studentId,index)=>{
+    const student=classmates.find(s=>s.studentId===studentId);
+    if(!student)return;
+
+    const card=document.createElement('div');
+    card.className='student-card';
+    const heading=document.createElement('h3');
+    heading.textContent='Student '+(index+1)+': '+student.name;
+    card.appendChild(heading);
+
+    const safeId='student_'+index;
+    card.insertAdjacentHTML('beforeend',`
+      <div class="field">
+        <label>Type of Incident</label>
+        <select id="type_${safeId}" multiple size="4">
+          <option value="Verbal Bullying">Verbal Bullying</option>
+          <option value="Physical Bullying">Physical Bullying</option>
+          <option value="Social / Relational Bullying">Social / Relational Bullying</option>
+          <option value="Cyberbullying">Cyberbullying</option>
+          <option value="Other">Other</option>
+        </select>
+        <p class="small">You may select more than one. Hold CTRL while selecting.</p>
+      </div>
+      <div class="grid">
+        <div class="field"><label>Date of Incident</label><input type="date" id="date_${safeId}"></div>
+        <div class="field"><label>Time of Incident</label><input type="time" id="time_${safeId}"></div>
+      </div>
+      <div class="field">
+        <label>Where did it happen?</label>
+        <select id="location_${safeId}">
+          <option value="">Select location</option><option>Classroom</option><option>School Grounds</option>
+          <option>Hallway</option><option>Canteen</option><option>Comfort Room</option>
+          <option>Online / Social Media</option><option>Outside School</option><option>Other</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>How often has this happened?</label>
+        <select id="frequency_${safeId}">
+          <option value="">Select frequency</option><option>Once</option><option>Twice</option>
+          <option>Three to five times</option><option>More than five times</option><option>Happens repeatedly</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Relationship to the incident</label>
+        <select id="connection_${safeId}">
+          <option value="">Select one</option><option>I personally experienced it</option>
+          <option>I witnessed it</option><option>Someone shared it with me</option>
+        </select>
+      </div>
+      <div class="field"><label>Witnesses (Optional)</label><input id="witness_${safeId}" placeholder="Names, if known"></div>
+      <div class="field"><label>What exactly happened?</label><textarea id="details_${safeId}" placeholder="Describe the specific incident involving this student..."></textarea></div>
+      <div class="field">
+        <label>Upload Evidence (Optional)</label>
+        <input type="file" id="evidence_${safeId}" accept="image/jpeg,image/png,image/webp,application/pdf" multiple>
+        <p class="small">Maximum 3 files, 5 MB each. JPG, PNG, WEBP or PDF.</p>
+      </div>
+    `);
+    container.appendChild(card);
+  });
+}
+
+function fileToBase64(file) {
+  return new Promise((resolve,reject)=>{
+    const reader=new FileReader();
+    reader.onload=()=>resolve({name:file.name,mimeType:file.type,data:reader.result});
+    reader.onerror=reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+/*********************************************************
+ * SUBMIT REPORT
+ *********************************************************/
+async function submitIncidentReport() {
+  const narrative=document.getElementById('generalNarrative').value.trim();
+  const urgent=document.getElementById('urgentAlert').checked;
+
+  if(selectedStudents.length===0)return message('reportMessage','Select at least one student.');
+  if(narrative.length<5)return message('reportMessage','Please describe your concern.');
+
+  const targets=[];
+  const btn=document.querySelector('#studentScreen .card > button');
+
+  try {
+    for(let index=0;index<selectedStudents.length;index++){
+      const studentId=selectedStudents[index];
+      const safeId='student_'+index;
+      const details=document.getElementById('details_'+safeId).value.trim();
+      if(!details)throw new Error('Complete the incident details for every selected student.');
+
+      const types=Array.from(document.getElementById('type_'+safeId).selectedOptions).map(o=>o.value);
+      const fileInput=document.getElementById('evidence_'+safeId);
+      if(fileInput.files.length>3)throw new Error('Maximum of 3 evidence files per student.');
+
+      const evidence=[];
+      for(const file of fileInput.files){
+        if(file.size>5*1024*1024)throw new Error(file.name+' exceeds the 5 MB limit.');
+        if(!['image/jpeg','image/png','image/webp','application/pdf'].includes(file.type))
+          throw new Error('Unsupported evidence file type: '+file.name);
+        evidence.push(await fileToBase64(file));
+      }
+
+      targets.push({
+        targetStudentId:studentId,
+        bullyingTypes:types,
+        incidentDate:document.getElementById('date_'+safeId).value,
+        incidentTime:document.getElementById('time_'+safeId).value,
+        location:document.getElementById('location_'+safeId).value,
+        frequency:document.getElementById('frequency_'+safeId).value,
+        schoolConnection:document.getElementById('connection_'+safeId).value,
+        witnesses:document.getElementById('witness_'+safeId).value,
+        incidentDetails:details,
+        evidence
+      });
+    }
+
+    setLoading(btn,true,'Submitting report...');
+    const result=await api('submitReport',{narrative,urgentAlert:urgent,targets});
+
+    message('reportMessage',(result.message||'Report submitted.')+' Reference: '+result.reportId,true);
+    document.getElementById('generalNarrative').value='';
+    document.getElementById('urgentAlert').checked=false;
+    document.getElementById('classmateSearch').value='';
+    selectedStudents=[];
+    renderClassmates();
+  } catch(error) {
+    message('reportMessage',error.message);
+  } finally {
+    setLoading(btn,false);
+  }
+}
+
+/*********************************************************
+ * ADVISER NAVIGATION
+ *********************************************************/
+function showAdminPage(page,button) {
+  ['adminOverview','adminReports','adminRegistrations'].forEach(id=>document.getElementById(id).classList.add('hidden'));
+  const map={overview:'adminOverview',reports:'adminReports',registrations:'adminRegistrations'};
+  document.getElementById(map[page]).classList.remove('hidden');
+  document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));
+  if(button)button.classList.add('active');
+}
+
+/*********************************************************
+ * DASHBOARD
+ *********************************************************/
+async function loadDashboard() {
+  try {
+    dashboardData=await api('adminDashboard');
+    const s=dashboardData.summary;
+    document.getElementById('totalReports').textContent=s.totalReports;
+    document.getElementById('urgentReports').textContent=s.urgentReports;
+    document.getElementById('newReports').textContent=s.newReports;
+    document.getElementById('pendingCount').textContent=s.pendingRegistrations;
+    renderRanking('mostReported',dashboardData.mostReportedStudents||[]);
+    renderRanking('frequentReporters',dashboardData.frequentReporters||[]);
+    renderReports();
+  } catch(error){alert(error.message);}
+}
+function renderRanking(elementId,data) {
+  const container=document.getElementById(elementId);
+  container.innerHTML='';
+  if(!data.length){container.textContent='No records available.';return;}
+  const max=Math.max(...data.map(x=>Number(x.count)||0),1);
+  data.forEach((item,index)=>{
+    const row=document.createElement('div');
+    const line=document.createElement('div');
+    line.className='list-item';
+    const name=document.createElement('span');
+    name.textContent=(index+1)+'. '+item.name;
+    const count=document.createElement('strong');
+    count.textContent=item.count;
+    line.append(name,count);
+    const progress=document.createElement('div');
+    progress.className='progress';
+    const fill=document.createElement('div');
+    fill.style.width=((Number(item.count)||0)/max*100)+'%';
+    progress.appendChild(fill);
+    row.append(line,progress);
+    container.appendChild(row);
+  });
+}
+function renderReports() {
+  if(!dashboardData)return;
+  const search=(document.getElementById('reportSearch')?.value||'').toLowerCase();
+  const body=document.getElementById('reportsTable');
+  body.innerHTML='';
+  const reports=(dashboardData.reports||[]).filter(r=>
+    String(r.reportId).toLowerCase().includes(search)||
+    String(r.reporterName).toLowerCase().includes(search)
+  );
+  if(!reports.length){body.innerHTML='<tr><td colspan="7">No reports found.</td></tr>';return;}
+  reports.forEach(r=>{
+    const tr=document.createElement('tr');
+    const date=r.submittedAt?new Date(r.submittedAt).toLocaleString():'';
+    const cells=[
+      escapeHTML(r.reportId),escapeHTML(date),escapeHTML(r.reporterName),
+      escapeHTML(r.targetCount),
+      r.urgentAlert?'<span class="badge badge-red">URGENT</span>':'<span class="badge">Regular</span>',
+      escapeHTML(r.status)
+    ];
+    cells.forEach(html=>{
+      const td=document.createElement('td');
+      td.innerHTML=html;
+      tr.appendChild(td);
+    });
+    const action=document.createElement('td');
+    const view=document.createElement('button');
+    view.className='btn';view.textContent='View';
+    view.addEventListener('click',()=>openReport(r.reportId));
+    action.appendChild(view);tr.appendChild(action);
+    body.appendChild(tr);
+  });
+}
+
+/*********************************************************
+ * REGISTRATION APPROVAL
+ *********************************************************/
+async function loadPending() {
+  try {
+    const pending=await api('adminPending');
+    const container=document.getElementById('pendingList');
+    container.innerHTML='';
+    if(!pending.length){container.textContent='No pending registrations.';return;}
+    pending.forEach(student=>{
+      const card=document.createElement('div');card.className='student-card';
+      const title=document.createElement('h3');title.textContent=student.name;
+      const info=document.createElement('p');
+      info.textContent='LRN: '+student.lrn+' | '+student.grade+' | '+student.section;
+      const approve=document.createElement('button');
+      approve.className='btn btn-green';approve.textContent='Approve';
+      approve.onclick=()=>approveStudent(student.lrn);
+      const reject=document.createElement('button');
+      reject.className='btn btn-danger';reject.style.marginLeft='8px';reject.textContent='Reject';
+      reject.onclick=()=>rejectStudent(student.lrn);
+      card.append(title,info,approve,reject);container.appendChild(card);
+    });
+  } catch(error){alert(error.message);}
+}
+async function approveStudent(lrn) {
+  if(!confirm('Approve this student account?'))return;
+  try{await api('adminApprove',{lrn});await loadPending();await loadDashboard();alert('Student approved.');}
+  catch(error){alert(error.message);}
+}
+async function rejectStudent(lrn) {
+  if(!confirm('Reject this registration?'))return;
+  try{await api('adminReject',{lrn});await loadPending();await loadDashboard();alert('Registration rejected.');}
+  catch(error){alert(error.message);}
+}
+
+/*********************************************************
+ * REPORT DETAILS
+ *********************************************************/
+async function openReport(reportId) {
+  try {
+    const result=await api('adminGetReport',{reportId});
+    const r=result.report;
+    const container=document.getElementById('reportDetailContent');
+    showOnly('reportDetailScreen');
+
+    let html=`
+      <div class="notice">
+        <strong>Report Reference:</strong> ${escapeHTML(r.reportId)}<br>
+        <strong>Submitted:</strong> ${escapeHTML(r.submittedAt)}<br>
+        <strong>Reporter:</strong> ${escapeHTML(r.reporterName)}<br>
+        <strong>Priority:</strong> ${r.urgentAlert?'URGENT':'Regular'}
+      </div>
+      <h3>General Description</h3><p>${escapeHTML(r.narrative)}</p><hr>
+      <h3>Individual Student Details</h3>
+    `;
+
+    (result.targets||[]).forEach((t,index)=>{
+      html+=`
+        <div class="student-card">
+          <h3>${index+1}. ${escapeHTML(t.targetName)}</h3>
+          <p><strong>Type:</strong> ${escapeHTML(t.bullyingTypes)}</p>
+          <p><strong>Date:</strong> ${escapeHTML(t.incidentDate)}</p>
+          <p><strong>Time:</strong> ${escapeHTML(t.incidentTime)}</p>
+          <p><strong>Location:</strong> ${escapeHTML(t.location)}</p>
+          <p><strong>Frequency:</strong> ${escapeHTML(t.frequency)}</p>
+          <p><strong>Relationship:</strong> ${escapeHTML(t.schoolConnection)}</p>
+          <p><strong>Witnesses:</strong> ${escapeHTML(t.witnesses)}</p>
+          <p><strong>Details:</strong></p><p>${escapeHTML(t.incidentDetails)}</p>
+          <div id="evidence_${index}"></div>
+        </div>
+      `;
+    });
+
+    html+=`
+      <hr><h3>Adviser Actions</h3>
+      <div class="field">
+        <label>Update Report Status</label>
+        <select id="detailStatus">
+          <option ${r.status==='Bago'?'selected':''}>Bago</option>
+          <option ${r.status==='Sinusuri'?'selected':''}>Sinusuri</option>
+          <option ${r.status==='May Aksyon'?'selected':''}>May Aksyon</option>
+          <option ${r.status==='Sarado'?'selected':''}>Sarado</option>
+        </select>
+      </div>
+      <div class="field"><label>Private Adviser Notes</label><textarea id="detailNotes">${escapeHTML(r.staffNotes)}</textarea></div>
+      <button class="btn" id="saveReportButton">Save Changes</button>
+    `;
+    container.innerHTML=html;
+    document.getElementById('saveReportButton').onclick=()=>saveReportActions(r.reportId);
+
+    (result.targets||[]).forEach((t,index)=>{
+      const box=document.getElementById('evidence_'+index);
+      if(!t.evidenceFileIDs?.length){box.textContent='No evidence attached.';return;}
+      t.evidenceFileIDs.forEach(fileId=>{
+        const btn=document.createElement('button');
+        btn.className='btn btn-secondary';btn.style.margin='5px';btn.textContent='View Evidence';
+        btn.onclick=()=>viewEvidence(r.reportId,fileId);
+        box.appendChild(btn);
+      });
+    });
+  } catch(error){alert(error.message);}
+}
+function closeReportDetails() {
+  showOnly('adminScreen');
+  showAdminPage('reports',document.querySelectorAll('.nav button')[1]);
+  loadDashboard();
+}
+
+/*********************************************************
+ * EVIDENCE VIEWER
+ *********************************************************/
+async function viewEvidence(reportId,fileId) {
+  try {
+    const result=await api('adminGetEvidence',{reportId,fileId});
+    const dataURL='data:'+result.mimeType+';base64,'+result.data;
+    const win=window.open();
+    if(!win)throw new Error('Please allow pop-ups to view evidence.');
+    if(result.mimeType==='application/pdf'){
+      const iframe=win.document.createElement('iframe');
+      iframe.src=dataURL;iframe.style.cssText='width:100%;height:100%;border:0';
+      win.document.body.style.margin='0';win.document.body.appendChild(iframe);
+    } else {
+      const image=win.document.createElement('img');
+      image.src=dataURL;image.style.maxWidth='100%';image.style.height='auto';
+      win.document.body.style.margin='0';win.document.body.appendChild(image);
+    }
+  } catch(error){alert(error.message);}
+}
+
+/*********************************************************
+ * SAVE ADVISER ACTIONS
+ *********************************************************/
+async function saveReportActions(reportId) {
+  const status=document.getElementById('detailStatus').value;
+  const notes=document.getElementById('detailNotes').value;
+  try {
+    await api('adminUpdateStatus',{reportId,status});
+    await api('adminUpdateNotes',{reportId,notes});
+    alert('Report updated successfully.');
+    await loadDashboard();
+  } catch(error){alert(error.message);}
+}
+
+/*********************************************************
+ * LOGOUT
+ *********************************************************/
+async function logout() {
+  try{if(token)await api('logout');}catch(error){}
+  token='';currentRole='';currentStudentName='';
+  classmates=[];selectedStudents=[];dashboardData=null;
+  document.getElementById('loginPassword').value='';
+  document.getElementById('adminPassword').value='';
+  showOnly('authScreen');showAuth('login');
+}
+
+showOnly('authScreen');
+</script>
+</body>
+</html>
