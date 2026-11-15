@@ -1,10 +1,11 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#172554">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
 <title>SafeSpace | Student Reporting Portal</title>
 
 <style>
@@ -45,7 +46,9 @@ textarea {min-height:95px;resize:vertical}
 .btn-secondary {background:#e2e8f0;color:#334155}
 .btn-danger {background:var(--red)}
 .btn-green {background:var(--green)}
+.btn-small {padding:8px 12px;font-size:13px}
 .small {font-size:12px;color:var(--muted)}
+.req {color:var(--red)}
 .notice {background:#eff6ff;border-left:4px solid var(--blue);padding:13px;border-radius:7px;font-size:13px;line-height:1.6;margin-bottom:17px}
 .alert {background:#fef2f2;border:1px solid #fecaca;padding:15px;border-radius:10px;color:#991b1b;margin:15px 0;line-height:1.5}
 .success {background:#f0fdf4;border:1px solid #bbf7d0;padding:14px;color:#166534;border-radius:9px;margin:12px 0}
@@ -58,8 +61,10 @@ textarea {min-height:95px;resize:vertical}
 .stat span {font-size:12px;color:var(--muted)}
 .student-card {border:1px solid var(--border);padding:18px;border-radius:12px;margin:15px 0;background:#fff}
 .student-card h3 {color:var(--navy)}
-.check-row {display:flex;align-items:flex-start;gap:10px;margin:10px 0;font-size:14px}
+.check-row {display:flex;align-items:flex-start;gap:10px;margin:10px 0;font-size:14px;font-weight:400}
 .check-row input {width:auto;margin-top:3px}
+.check-group {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:2px 14px}
+.check-group .check-row {margin:6px 0}
 .badge {display:inline-block;padding:5px 9px;border-radius:20px;background:#e2e8f0;font-size:11px;font-weight:700}
 .badge-red {background:#fee2e2;color:#991b1b}
 .badge-green {background:#dcfce7;color:#166534}
@@ -74,11 +79,14 @@ th {background:#f8fafc;color:#475569}
 .nav {display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
 .nav button {border:1px solid var(--border);background:white;border-radius:9px;padding:10px 14px;font-weight:700;color:#475569}
 .nav button.active {background:var(--navy);color:white}
+.temp-box {background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:14px;margin-bottom:15px;line-height:1.7;font-size:14px}
+.temp-box code {font-size:18px;font-weight:700;letter-spacing:1px;background:#fef3c7;padding:3px 8px;border-radius:6px}
 footer {text-align:center;color:var(--muted);font-size:12px;padding:30px 10px}
 hr {border:0;border-top:1px solid var(--border);margin:20px 0}
 @media(max-width:700px) {
   .stats {grid-template-columns:repeat(2,minmax(0,1fr))}
   .grid {grid-template-columns:1fr}
+  .check-group {grid-template-columns:1fr}
   .container {margin:20px auto}
   .card {padding:19px}
   .topbar {padding:14px 18px}
@@ -109,56 +117,50 @@ hr {border:0;border-top:1px solid var(--border);margin:20px 0}
     <div class="notice">Your submitted report will be accessible to your class adviser. Please provide truthful and accurate information.</div>
 
     <div class="tabs">
-      <button class="tab active" id="loginTab" onclick="showAuth('login')">Student Login</button>
-      <button class="tab" id="registerTab" onclick="showAuth('register')">Register</button>
+      <button type="button" class="tab active" id="loginTab" onclick="showAuth('login')">Student Login</button>
+      <button type="button" class="tab" id="registerTab" onclick="showAuth('register')">Register</button>
     </div>
 
-    <div id="loginForm">
+    <form id="loginForm" onsubmit="studentLogin(event)" novalidate>
       <div class="field">
-        <label>12-Digit LRN</label>
-        <input id="loginLRN" inputmode="numeric" maxlength="12" placeholder="Enter your LRN">
+        <label for="loginLRN">12-Digit LRN</label>
+        <input id="loginLRN" inputmode="numeric" maxlength="12" autocomplete="username" placeholder="Enter your LRN">
       </div>
       <div class="field">
-        <label>Password</label>
-        <input id="loginPassword" type="password" placeholder="Enter password">
+        <label for="loginPassword">Password</label>
+        <input id="loginPassword" type="password" autocomplete="current-password" placeholder="Enter password">
       </div>
-      <button class="btn btn-block" onclick="studentLogin()">Login to SafeSpace</button>
-    </div>
+      <button type="submit" class="btn btn-block" id="loginBtn">Login to SafeSpace</button>
+    </form>
 
-    <div id="registerForm" class="hidden">
+    <form id="registerForm" class="hidden" onsubmit="registerStudent(event)" novalidate>
       <div class="field">
-        <label>Full Name</label>
-        <input id="regName" placeholder="Enter your complete name">
-        <p class="small">Your name will be verified against the class masterlist.</p>
-      </div>
-      <div class="field">
-        <label>12-Digit LRN</label>
-        <input id="regLRN" maxlength="12" inputmode="numeric" placeholder="Enter your LRN">
-      </div>
-      <div class="grid">
-        <div class="field">
-          <label>Birthday</label>
-          <input id="regBirthday" type="date">
-        </div>
-        <div class="field">
-          <label>Age</label>
-          <input id="regAge" type="number" min="10" max="30" placeholder="Age">
-        </div>
+        <label for="regName">Full Name</label>
+        <input id="regName" autocomplete="off" placeholder="Enter your complete name">
+        <p class="small">Ang LRN at birthday mo ang gagamitin para i-verify ka. Aaprubahan pa rin ng adviser ang account mo.</p>
       </div>
       <div class="field">
-        <label>Create Password</label>
-        <input id="regPassword" type="password" placeholder="At least 8 characters">
+        <label for="regLRN">12-Digit LRN</label>
+        <input id="regLRN" maxlength="12" inputmode="numeric" autocomplete="off" placeholder="Enter your LRN">
       </div>
       <div class="field">
-        <label>Confirm Password</label>
-        <input id="regConfirm" type="password" placeholder="Repeat password">
+        <label for="regBirthday">Birthday</label>
+        <input id="regBirthday" type="date">
       </div>
-      <button class="btn btn-block" onclick="registerStudent()">Submit Registration</button>
-    </div>
-    <div id="authMessage"></div>
+      <div class="field">
+        <label for="regPassword">Create Password</label>
+        <input id="regPassword" type="password" autocomplete="new-password" placeholder="At least 8 characters">
+      </div>
+      <div class="field">
+        <label for="regConfirm">Confirm Password</label>
+        <input id="regConfirm" type="password" autocomplete="new-password" placeholder="Repeat password">
+      </div>
+      <button type="submit" class="btn btn-block" id="registerBtn">Submit Registration</button>
+    </form>
+    <div id="authMessage" role="alert"></div>
   </div>
   <div style="text-align:center;margin-top:20px">
-    <button class="btn btn-secondary" onclick="showAdminLogin()">Adviser Login</button>
+    <button type="button" class="btn btn-secondary" onclick="showAdminLogin()">Adviser Login</button>
   </div>
 </section>
 
@@ -166,31 +168,33 @@ hr {border:0;border-top:1px solid var(--border);margin:20px 0}
   <div class="card">
     <h2>Adviser Access</h2>
     <p class="subtitle">Authorized class adviser only.</p>
-    <div class="field"><label>Username</label><input id="adminUsername" value="admin"></div>
-    <div class="field"><label>Administrator Password</label><input id="adminPassword" type="password"></div>
-    <button class="btn btn-block" onclick="adminLogin()">Login as Adviser</button>
-    <button class="btn btn-secondary btn-block" style="margin-top:10px" onclick="backToAuth()">Back to Student Portal</button>
-    <div id="adminLoginMessage"></div>
+    <form onsubmit="adminLogin(event)" novalidate>
+      <div class="field"><label for="adminUsername">Username</label><input id="adminUsername" autocomplete="username"></div>
+      <div class="field"><label for="adminPassword">Administrator Password</label><input id="adminPassword" type="password" autocomplete="current-password"></div>
+      <button type="submit" class="btn btn-block" id="adminLoginBtn">Login as Adviser</button>
+    </form>
+    <button type="button" class="btn btn-secondary btn-block" style="margin-top:10px" onclick="backToAuth()">Back to Student Portal</button>
+    <div id="adminLoginMessage" role="alert"></div>
   </div>
 </section>
 
 <section id="studentScreen" class="hidden">
   <div class="section-title">
     <div><h2 id="studentWelcome">Hello, Student!</h2><p class="subtitle">You are inside the SafeSpace student portal.</p></div>
-    <button class="btn btn-secondary" onclick="logout()">Logout</button>
+    <button type="button" class="btn btn-secondary" onclick="logout()">Logout</button>
   </div>
   <div class="card">
     <h2>Report a Concern</h2>
     <p class="subtitle">You may report an incident involving one or more classmates. Each reported student will have a separate incident record.</p>
     <div class="notice">You may select up to five students in one submission. If you feel unsafe or are in immediate danger, approach a trusted adult or your adviser directly. Do not wait for an online response.</div>
     <div class="field">
-      <label>What happened? (General description)</label>
-      <textarea id="generalNarrative" placeholder="Briefly describe your concern or experience..."></textarea>
+      <label for="generalNarrative">What happened? (General description) <span class="req">*</span></label>
+      <textarea id="generalNarrative" maxlength="10000" placeholder="Briefly describe your concern or experience..."></textarea>
     </div>
     <div class="field">
-      <label>Select classmates involved</label>
-      <input id="classmateSearch" placeholder="Search student name..." oninput="filterClassmates()">
-      <div id="classmateList" style="margin-top:10px"></div>
+      <label for="classmateSearch">Select classmates involved <span class="req">*</span></label>
+      <input id="classmateSearch" placeholder="Search student name..." oninput="renderClassmates()">
+      <div id="classmateList" style="margin-top:10px;max-height:300px;overflow-y:auto"></div>
       <p class="small" id="selectedCount">0 of 5 students selected</p>
     </div>
     <div id="individualDetails"></div>
@@ -201,8 +205,8 @@ hr {border:0;border-top:1px solid var(--border);margin:20px 0}
       </label>
       <p class="small" style="color:#991b1b">This alert is intended for urgent concerns, not ordinary reports.</p>
     </div>
-    <button class="btn btn-block" onclick="submitIncidentReport()">Submit Confidential Report</button>
-    <div id="reportMessage"></div>
+    <button type="button" class="btn btn-block" id="submitReportBtn" onclick="submitIncidentReport()">Submit Confidential Report</button>
+    <div id="reportMessage" role="alert"></div>
   </div>
 </section>
 
@@ -210,23 +214,26 @@ hr {border:0;border-top:1px solid var(--border);margin:20px 0}
   <div class="card">
     <h2>Change Temporary Password</h2>
     <p class="subtitle">You must change your temporary password before continuing.</p>
-    <div class="field"><label>Current Password</label><input id="oldPassword" type="password"></div>
-    <div class="field"><label>New Password</label><input id="newPassword" type="password"></div>
-    <div class="field"><label>Confirm New Password</label><input id="confirmNewPassword" type="password"></div>
-    <button class="btn btn-block" onclick="changePassword()">Save New Password</button>
-    <div id="changePasswordMessage"></div>
+    <form onsubmit="changePassword(event)" novalidate>
+      <div class="field"><label for="oldPassword">Current (Temporary) Password</label><input id="oldPassword" type="password" autocomplete="current-password"></div>
+      <div class="field"><label for="newPassword">New Password</label><input id="newPassword" type="password" autocomplete="new-password" placeholder="At least 8 characters"></div>
+      <div class="field"><label for="confirmNewPassword">Confirm New Password</label><input id="confirmNewPassword" type="password" autocomplete="new-password"></div>
+      <button type="submit" class="btn btn-block" id="changePasswordBtn">Save New Password</button>
+    </form>
+    <div id="changePasswordMessage" role="alert"></div>
   </div>
 </section>
 
 <section id="adminScreen" class="hidden">
   <div class="section-title">
     <div><h2>Adviser Dashboard</h2><p class="subtitle">SafeSpace • Grade 9 PERAS</p></div>
-    <button class="btn btn-secondary" onclick="logout()">Logout</button>
+    <button type="button" class="btn btn-secondary" onclick="logout()">Logout</button>
   </div>
   <div class="nav">
-    <button class="active" onclick="showAdminPage('overview',this)">Overview</button>
-    <button onclick="showAdminPage('reports',this)">Incident Reports</button>
-    <button onclick="showAdminPage('registrations',this)">Registrations</button>
+    <button type="button" class="active" data-page="overview" onclick="showAdminPage('overview')">Overview</button>
+    <button type="button" data-page="reports" onclick="showAdminPage('reports')">Incident Reports</button>
+    <button type="button" data-page="registrations" onclick="showAdminPage('registrations')">Registrations</button>
+    <button type="button" data-page="students" onclick="showAdminPage('students')">Students</button>
   </div>
   <div id="adminOverview">
     <div class="stats">
@@ -250,8 +257,18 @@ hr {border:0;border-top:1px solid var(--border);margin:20px 0}
   </div>
   <div id="adminReports" class="hidden">
     <div class="card">
-      <div class="section-title"><h3>Incident Reports</h3><button class="btn btn-secondary" onclick="loadDashboard()">Refresh</button></div>
-      <div class="field"><input id="reportSearch" placeholder="Search report ID or reporter..." oninput="renderReports()"></div>
+      <div class="section-title"><h3>Incident Reports</h3><button type="button" class="btn btn-secondary" onclick="loadDashboard()">Refresh</button></div>
+      <div class="grid" style="margin-bottom:15px">
+        <input id="reportSearch" placeholder="Search report ID or reporter..." oninput="renderReports()" aria-label="Search reports">
+        <select id="reportFilter" onchange="renderReports()" aria-label="Filter reports">
+          <option value="all">All reports</option>
+          <option value="urgent">Urgent only</option>
+          <option value="Bago">Bago (New)</option>
+          <option value="Sinusuri">Sinusuri (Under Review)</option>
+          <option value="May Aksyon">May Aksyon (Action Taken)</option>
+          <option value="Sarado">Sarado (Closed)</option>
+        </select>
+      </div>
       <div class="table-wrap">
         <table>
           <thead><tr><th>Report ID</th><th>Submitted</th><th>Reporter</th><th>Students</th><th>Priority</th><th>Status</th><th>Action</th></tr></thead>
@@ -262,15 +279,28 @@ hr {border:0;border-top:1px solid var(--border);margin:20px 0}
   </div>
   <div id="adminRegistrations" class="hidden">
     <div class="card">
-      <div class="section-title"><h3>Student Registration Requests</h3><button class="btn btn-secondary" onclick="loadPending()">Refresh</button></div>
+      <div class="section-title"><h3>Student Registration Requests</h3><button type="button" class="btn btn-secondary" onclick="loadPending()">Refresh</button></div>
+      <p class="small">Before approving, confirm in person that the student really made this request.</p>
       <div id="pendingList"></div>
+    </div>
+  </div>
+  <div id="adminStudents" class="hidden">
+    <div class="card">
+      <div class="section-title"><h3>Student Accounts</h3><button type="button" class="btn btn-secondary" onclick="loadStudents()">Refresh</button></div>
+      <div id="resetResult"></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Name</th><th>LRN</th><th>Status</th><th>Last Login</th><th>Action</th></tr></thead>
+          <tbody id="studentsTable"></tbody>
+        </table>
+      </div>
     </div>
   </div>
 </section>
 
 <section id="reportDetailScreen" class="hidden">
   <div class="card">
-    <div class="section-title"><h2>Incident Report Details</h2><button class="btn btn-secondary" onclick="closeReportDetails()">Back</button></div>
+    <div class="section-title"><h2>Incident Report Details</h2><button type="button" class="btn btn-secondary" onclick="closeReportDetails()">Back</button></div>
     <div id="reportDetailContent"></div>
   </div>
 </section>
@@ -285,341 +315,554 @@ hr {border:0;border-top:1px solid var(--border);margin:20px 0}
  *********************************************************/
 const API_URL = 'https://script.google.com/macros/s/AKfycbzUMNilz2ZOUE1nNemX_Q6eD7VUIlwiVJ1mBat1hIpzcQyDjUQA50Rjl-3UMvw_JkAm/exec';
 
+const MAX_SELECT = 5;
+const MAX_FILES = 3;
+const MAX_PDF_BYTES = 5 * 1024 * 1024;
+const MAX_IMAGE_ORIGINAL_BYTES = 25 * 1024 * 1024;   // lalaliitin ang mga larawan bago i-upload
+const MAX_TOTAL_BYTES = 12 * 1024 * 1024;
+const IDLE_LIMIT_MS = { student: 10 * 60 * 1000, admin: 20 * 60 * 1000 };
+
+// Dapat eksaktong tugma sa OPTIONS sa Code.gs
+const TYPES = ['Verbal Bullying','Physical Bullying','Social / Relational Bullying','Cyberbullying','Other'];
+const LOCATIONS = ['Classroom','School Grounds','Hallway','Canteen','Comfort Room','Online / Social Media','Outside School','Other'];
+const FREQUENCIES = ['Once','Twice','Three to five times','More than five times','Happens repeatedly'];
+const CONNECTIONS = ['I personally experienced it','I witnessed it','Someone shared it with me'];
+const STATUSES = ['Bago','Sinusuri','May Aksyon','Sarado'];
+const STATUS_LABELS = {'Bago':'New','Sinusuri':'Under Review','May Aksyon':'Action Taken','Sarado':'Closed'};
+
 let token = '';
 let currentRole = '';
 let currentStudentName = '';
 let classmates = [];
 let selectedStudents = [];
 let dashboardData = null;
+let cardSeq = 0;
+let lastActivity = Date.now();
 
-async function api(action,data={}) {
+const $ = id => document.getElementById(id);
+
+/*********************************************************
+ * API
+ *********************************************************/
+async function api(action, data = {}, timeoutMs = 45000) {
   if (!API_URL.startsWith('https://script.google.com/macros/s/')) {
     throw new Error('Please configure the Apps Script Web App URL first.');
   }
-  const response = await fetch(API_URL,{
-    method:'POST',
-    headers:{'Content-Type':'text/plain;charset=utf-8'},
-    body:JSON.stringify({action,token,...data}),
-    redirect:'follow'
-  });
-  if (!response.ok) throw new Error('Unable to connect to the server.');
-  const result = await response.json();
-  if (!result.success) throw new Error(result.message || 'Request failed.');
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  let result;
+  try {
+    const response = await fetch(API_URL, {
+      method: 'POST',
+      headers: {'Content-Type': 'text/plain;charset=utf-8'},
+      body: JSON.stringify({action, token, ...data}),
+      redirect: 'follow',
+      signal: controller.signal
+    });
+    if (!response.ok) throw new Error('Unable to connect to the server.');
+    result = await response.json();
+  } catch (err) {
+    if (err.name === 'AbortError') throw new Error('The server took too long to respond. Please check your connection and try again.');
+    if (err instanceof SyntaxError) throw new Error('Unexpected server response. Please try again.');
+    if (err instanceof TypeError) throw new Error('Unable to connect to the server. Please check your internet connection.');
+    throw err;
+  } finally {
+    clearTimeout(timer);
+  }
+  if (!result.success) {
+    if (result.code === 'SESSION' && token) sessionExpired(result.message);
+    const error = new Error(result.message || 'Request failed.');
+    error.code = result.code;
+    throw error;
+  }
   return result.data;
 }
 
+/*********************************************************
+ * HELPERS
+ *********************************************************/
 function showOnly(id) {
   ['authScreen','adminLoginScreen','studentScreen','adminScreen','changePasswordScreen','reportDetailScreen']
-    .forEach(screen=>document.getElementById(screen).classList.toggle('hidden',screen!==id));
+    .forEach(screen => $(screen).classList.toggle('hidden', screen !== id));
+  window.scrollTo(0, 0);
 }
-function message(id,text,success=false) {
-  const element=document.getElementById(id);
-  element.innerHTML='';
-  const div=document.createElement('div');
-  div.className=success?'success':'error';
-  div.textContent=text;
+function message(id, text, success = false) {
+  const element = $(id);
+  element.innerHTML = '';
+  const div = document.createElement('div');
+  div.className = success ? 'success' : 'error';
+  div.textContent = text;
   element.appendChild(div);
+  element.scrollIntoView({block: 'nearest', behavior: 'smooth'});
 }
-function clearMessage(id) {document.getElementById(id).innerHTML='';}
-function setLoading(button,loading,text='Please wait...') {
+function clearMessage(id) { $(id).innerHTML = ''; }
+function setLoading(button, loading, text = 'Please wait...') {
   if (!button) return;
   if (loading) {
-    if (!button.dataset.original) button.dataset.original=button.textContent;
-    button.disabled=true;button.textContent=text;
+    if (!button.dataset.original) button.dataset.original = button.textContent;
+    button.disabled = true;
+    button.textContent = text;
   } else {
-    button.disabled=false;button.textContent=button.dataset.original||'Submit';
+    button.disabled = false;
+    if (button.dataset.original) button.textContent = button.dataset.original;
     delete button.dataset.original;
   }
 }
 function escapeHTML(value) {
-  return String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  return String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
+function fmtDate(value) {
+  if (!value) return '';
+  const d = new Date(value);
+  return isNaN(d.getTime()) ? String(value) : d.toLocaleString();
+}
+function todayLocal() {
+  const d = new Date();
+  const pad = n => String(n).padStart(2, '0');
+  return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+}
+function statusLabel(s) { return STATUS_LABELS[s] ? s + ' (' + STATUS_LABELS[s] + ')' : String(s || ''); }
+function reportError(error) { if (error.code !== 'SESSION') alert(error.message); }
 
+/*********************************************************
+ * SESSION / IDLE HANDLING
+ *********************************************************/
+function resetState() {
+  token = ''; currentRole = ''; currentStudentName = '';
+  classmates = []; selectedStudents = []; dashboardData = null;
+  document.querySelectorAll('input, textarea').forEach(el => {
+    if (el.type === 'checkbox') el.checked = false; else el.value = '';
+  });
+  ['classmateList','individualDetails','reportMessage','authMessage','adminLoginMessage',
+   'changePasswordMessage','resetResult','pendingList','reportsTable','studentsTable',
+   'reportDetailContent'].forEach(id => { const el = $(id); if (el) el.innerHTML = ''; });
+  $('selectedCount').textContent = '0 of 5 students selected';
+}
+function goToLogin(note) {
+  resetState();
+  showOnly('authScreen');
+  showAuth('login');
+  if (note) message('authMessage', note);
+}
+function sessionExpired(note) { goToLogin(note || 'Session expired. Please log in again.'); }
+async function logout() {
+  try { if (token) await api('logout'); } catch (e) {}
+  goToLogin();
+}
+function forceLogout(note) {
+  if (token) { api('logout').catch(() => {}); }
+  goToLogin(note);
+}
+['click','keydown','touchstart','mousemove','scroll'].forEach(evt =>
+  document.addEventListener(evt, () => { lastActivity = Date.now(); }, {passive: true}));
+function checkIdle() {
+  if (!token || !currentRole) return;
+  if (Date.now() - lastActivity > IDLE_LIMIT_MS[currentRole]) {
+    forceLogout('You were logged out because of inactivity.');
+  }
+}
+setInterval(checkIdle, 15000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) checkIdle(); });
+
+/*********************************************************
+ * AUTH SCREENS
+ *********************************************************/
 function showAuth(type) {
-  const login=type==='login';
-  document.getElementById('loginForm').classList.toggle('hidden',!login);
-  document.getElementById('registerForm').classList.toggle('hidden',login);
-  document.getElementById('loginTab').classList.toggle('active',login);
-  document.getElementById('registerTab').classList.toggle('active',!login);
+  const login = type === 'login';
+  $('loginForm').classList.toggle('hidden', !login);
+  $('registerForm').classList.toggle('hidden', login);
+  $('loginTab').classList.toggle('active', login);
+  $('registerTab').classList.toggle('active', !login);
   clearMessage('authMessage');
 }
-function showAdminLogin(){showOnly('adminLoginScreen');clearMessage('adminLoginMessage');}
-function backToAuth(){showOnly('authScreen');showAuth('login');}
+function showAdminLogin() { showOnly('adminLoginScreen'); clearMessage('adminLoginMessage'); }
+function backToAuth() { showOnly('authScreen'); showAuth('login'); }
+
+// Numero lang ang tinatanggap sa LRN
+['loginLRN','regLRN'].forEach(id =>
+  $(id).addEventListener('input', e => { e.target.value = e.target.value.replace(/\D/g, '').slice(0, 12); }));
+$('regBirthday').max = todayLocal();
 
 /*********************************************************
  * REGISTRATION
  *********************************************************/
-async function registerStudent() {
-  const name=document.getElementById('regName').value.trim();
-  const lrn=document.getElementById('regLRN').value.trim();
-  const birthday=document.getElementById('regBirthday').value;
-  const age=Number(document.getElementById('regAge').value);
-  const password=document.getElementById('regPassword').value;
-  const confirm=document.getElementById('regConfirm').value;
+async function registerStudent(e) {
+  if (e) e.preventDefault();
+  const name = $('regName').value.trim();
+  const lrn = $('regLRN').value.trim();
+  const birthday = $('regBirthday').value;
+  const password = $('regPassword').value;
+  const confirm = $('regConfirm').value;
 
-  if(!name||!/^\d{12}$/.test(lrn)||!birthday||!age)
-    return message('authMessage','Please complete all registration fields.');
-  if(password.length<8)return message('authMessage','Password must contain at least 8 characters.');
-  if(password!==confirm)return message('authMessage','Passwords do not match.');
+  if (!name || !/^\d{12}$/.test(lrn) || !birthday) return message('authMessage', 'Please complete all registration fields (LRN must be 12 digits).');
+  if (password.length < 8) return message('authMessage', 'Password must contain at least 8 characters.');
+  if (password === lrn) return message('authMessage', 'Password must be different from your LRN.');
+  if (password !== confirm) return message('authMessage', 'Passwords do not match.');
 
-  const btn=document.querySelector('#registerForm button');
-  setLoading(btn,true,'Submitting...');
+  const btn = $('registerBtn');
+  setLoading(btn, true, 'Submitting...');
   try {
-    await api('register',{fullName:name,lrn,birthday,age,password});
-    message('authMessage','Registration submitted successfully. Wait for your adviser to approve your account.',true);
-    ['regName','regLRN','regBirthday','regAge','regPassword','regConfirm'].forEach(id=>document.getElementById(id).value='');
-  } catch(error) {
-    message('authMessage',error.message);
-  } finally {setLoading(btn,false);}
+    await api('register', {fullName: name, lrn, birthday, password});
+    ['regName','regLRN','regBirthday','regPassword','regConfirm'].forEach(id => $(id).value = '');
+    message('authMessage', 'Registration submitted successfully. Wait for your adviser to approve your account.', true);
+  } catch (error) {
+    message('authMessage', error.message);
+  } finally { setLoading(btn, false); }
 }
 
 /*********************************************************
  * STUDENT LOGIN
  *********************************************************/
-async function studentLogin() {
-  const lrn=document.getElementById('loginLRN').value.trim();
-  const password=document.getElementById('loginPassword').value;
-  if(!lrn||!password)return message('authMessage','Enter your LRN and password.');
-  const btn=document.querySelector('#loginForm button');
-  setLoading(btn,true,'Logging in...');
+async function studentLogin(e) {
+  if (e) e.preventDefault();
+  const lrn = $('loginLRN').value.trim();
+  const password = $('loginPassword').value;
+  if (!/^\d{12}$/.test(lrn)) return message('authMessage', 'Enter your 12-digit LRN.');
+  if (!password) return message('authMessage', 'Enter your password.');
+
+  const btn = $('loginBtn');
+  setLoading(btn, true, 'Logging in...');
   try {
-    const result=await api('studentLogin',{lrn,password});
-    token=result.token;currentRole='student';currentStudentName=result.name;
-    if(result.mustChangePassword){showOnly('changePasswordScreen');return;}
+    const result = await api('studentLogin', {lrn, password});
+    token = result.token; currentRole = 'student'; currentStudentName = result.name;
+    lastActivity = Date.now();
+    $('loginPassword').value = '';
+    if (result.mustChangePassword) {
+      clearMessage('changePasswordMessage');
+      showOnly('changePasswordScreen');
+      return;
+    }
     await openStudentDashboard();
-  } catch(error){message('authMessage',error.message);}
-  finally{setLoading(btn,false);}
+  } catch (error) { message('authMessage', error.message); }
+  finally { setLoading(btn, false); }
 }
 
 async function openStudentDashboard() {
   showOnly('studentScreen');
-  document.getElementById('studentWelcome').textContent='Hello, '+currentStudentName+'!';
-  selectedStudents=[];
+  $('studentWelcome').textContent = 'Hello, ' + currentStudentName + '!';
+  selectedStudents = [];
+  $('individualDetails').innerHTML = '';
   try {
-    classmates=await api('getClassmates');
+    classmates = await api('getClassmates');
     renderClassmates();
-  } catch(error){message('reportMessage',error.message);}
+  } catch (error) { message('reportMessage', error.message); }
 }
 
-async function changePassword() {
-  const oldPassword=document.getElementById('oldPassword').value;
-  const newPassword=document.getElementById('newPassword').value;
-  const confirm=document.getElementById('confirmNewPassword').value;
-  if(newPassword.length<8)return message('changePasswordMessage','New password must have at least 8 characters.');
-  if(newPassword!==confirm)return message('changePasswordMessage','New passwords do not match.');
+async function changePassword(e) {
+  if (e) e.preventDefault();
+  const oldPassword = $('oldPassword').value;
+  const newPassword = $('newPassword').value;
+  const confirm = $('confirmNewPassword').value;
+  if (!oldPassword) return message('changePasswordMessage', 'Enter your current (temporary) password.');
+  if (newPassword.length < 8) return message('changePasswordMessage', 'New password must have at least 8 characters.');
+  if (newPassword !== confirm) return message('changePasswordMessage', 'New passwords do not match.');
+
+  const btn = $('changePasswordBtn');
+  setLoading(btn, true, 'Saving...');
   try {
-    const result=await api('changePassword',{oldPassword,newPassword});
-    message('changePasswordMessage',result.message||'Password changed successfully.',true);
-    token='';
-    setTimeout(()=>{showOnly('authScreen');showAuth('login');},1200);
-  } catch(error){message('changePasswordMessage',error.message);}
+    await api('changePassword', {oldPassword, newPassword});
+    goToLogin();
+    message('authMessage', 'Password changed. Please log in with your new password.', true);
+  } catch (error) { message('changePasswordMessage', error.message); }
+  finally { setLoading(btn, false); }
 }
 
 /*********************************************************
  * ADVISER LOGIN
  *********************************************************/
-async function adminLogin() {
-  const username=document.getElementById('adminUsername').value.trim();
-  const password=document.getElementById('adminPassword').value;
-  if(!username||!password)return message('adminLoginMessage','Enter your administrator credentials.');
+async function adminLogin(e) {
+  if (e) e.preventDefault();
+  const username = $('adminUsername').value.trim();
+  const password = $('adminPassword').value;
+  if (!username || !password) return message('adminLoginMessage', 'Enter your administrator credentials.');
+
+  const btn = $('adminLoginBtn');
+  setLoading(btn, true, 'Logging in...');
   try {
-    const result=await api('staffLogin',{username,password});
-    token=result.token;currentRole='admin';
+    const result = await api('staffLogin', {username, password});
+    token = result.token; currentRole = 'admin'; lastActivity = Date.now();
+    $('adminPassword').value = '';
     showOnly('adminScreen');
-    await loadDashboard();await loadPending();
-  } catch(error){message('adminLoginMessage',error.message);}
+    showAdminPage('overview');
+    await loadDashboard();
+    await loadPending();
+  } catch (error) { message('adminLoginMessage', error.message); }
+  finally { setLoading(btn, false); }
 }
 
 /*********************************************************
- * CLASSMATE SELECTION
- * Updated: uses studentId, not LRN.
+ * CLASSMATE SELECTION  (studentId lang ang ginagamit, hindi LRN)
  *********************************************************/
 function renderClassmates() {
-  const list=document.getElementById('classmateList');
-  list.innerHTML='';
-  const search=document.getElementById('classmateSearch').value.toLowerCase();
-  const filtered=classmates.filter(s=>String(s.name||'').toLowerCase().includes(search));
+  const list = $('classmateList');
+  list.innerHTML = '';
+  const search = $('classmateSearch').value.toLowerCase().trim();
+  const filtered = classmates.filter(s => String(s.name || '').toLowerCase().includes(search));
+  const full = selectedStudents.length >= MAX_SELECT;
 
-  filtered.forEach(student=>{
-    const checked=selectedStudents.includes(student.studentId);
-    const label=document.createElement('label');
-    label.className='check-row';
-    label.style.padding='9px';
-    label.style.borderBottom='1px solid #e2e8f0';
+  if (!filtered.length) {
+    list.textContent = classmates.length ? 'No matching students.' : 'No classmates available.';
+  }
 
-    const checkbox=document.createElement('input');
-    checkbox.type='checkbox';checkbox.checked=checked;
-    checkbox.addEventListener('change',()=>{
-      if(checkbox.checked){
-        if(selectedStudents.length>=5){checkbox.checked=false;alert('You may select up to five students only.');return;}
+  filtered.forEach(student => {
+    const checked = selectedStudents.includes(student.studentId);
+    const label = document.createElement('label');
+    label.className = 'check-row';
+    label.style.padding = '9px';
+    label.style.margin = '0';
+    label.style.borderBottom = '1px solid #e2e8f0';
+
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.checked = checked;
+    checkbox.disabled = !checked && full;
+    checkbox.dataset.sid = student.studentId;
+    checkbox.addEventListener('change', () => {
+      if (checkbox.checked) {
+        if (selectedStudents.length >= MAX_SELECT) { checkbox.checked = false; return; }
         selectedStudents.push(student.studentId);
       } else {
-        selectedStudents=selectedStudents.filter(id=>id!==student.studentId);
+        selectedStudents = selectedStudents.filter(id => id !== student.studentId);
       }
       updateSelectedStudents();
     });
 
-    const span=document.createElement('span');
-    span.textContent=student.name;
-    label.append(checkbox,span);
+    const span = document.createElement('span');
+    span.textContent = student.name;
+    label.append(checkbox, span);
     list.appendChild(label);
   });
   updateSelectedStudents();
 }
-function filterClassmates(){renderClassmates();}
-function updateSelectedStudents(){
-  document.getElementById('selectedCount').textContent=selectedStudents.length+' of 5 students selected';
+
+function updateSelectedStudents() {
+  $('selectedCount').textContent = selectedStudents.length + ' of ' + MAX_SELECT + ' students selected';
+  const full = selectedStudents.length >= MAX_SELECT;
+  document.querySelectorAll('#classmateList input[type=checkbox]').forEach(cb => {
+    cb.disabled = !cb.checked && full;
+  });
   renderIndividualDetails();
 }
 
 /*********************************************************
  * INDIVIDUAL INCIDENT FORMS
+ * Hindi ni-re-rebuild ang buong form; nadadagdagan o nababawasan lang ang card,
+ * kaya hindi nawawala ang mga naisulat na.
  *********************************************************/
+function optionsHTML(list, placeholder) {
+  return '<option value="">' + escapeHTML(placeholder) + '</option>' +
+    list.map(x => '<option>' + escapeHTML(x) + '</option>').join('');
+}
+
+function buildStudentCard(student) {
+  const seq = ++cardSeq;
+  const card = document.createElement('div');
+  card.className = 'student-card';
+  card.dataset.sid = student.studentId;
+
+  const heading = document.createElement('h3');
+  heading.className = 'card-heading';
+  heading.dataset.name = student.name;
+  card.appendChild(heading);
+
+  card.insertAdjacentHTML('beforeend', `
+    <div class="field">
+      <label>Type of Incident <span class="req">*</span></label>
+      <div class="check-group">
+        ${TYPES.map(t => `<label class="check-row"><input type="checkbox" class="f-type" value="${escapeHTML(t)}"><span>${escapeHTML(t)}</span></label>`).join('')}
+      </div>
+      <p class="small">You may select more than one.</p>
+    </div>
+    <div class="grid">
+      <div class="field"><label for="date_${seq}">Date of Incident <span class="req">*</span></label><input type="date" class="f-date" id="date_${seq}" max="${todayLocal()}"></div>
+      <div class="field"><label for="time_${seq}">Time of Incident (optional)</label><input type="time" class="f-time" id="time_${seq}"></div>
+    </div>
+    <div class="field">
+      <label for="location_${seq}">Where did it happen? <span class="req">*</span></label>
+      <select class="f-location" id="location_${seq}">${optionsHTML(LOCATIONS, 'Select location')}</select>
+    </div>
+    <div class="field">
+      <label for="frequency_${seq}">How often has this happened? <span class="req">*</span></label>
+      <select class="f-frequency" id="frequency_${seq}">${optionsHTML(FREQUENCIES, 'Select frequency')}</select>
+    </div>
+    <div class="field">
+      <label for="connection_${seq}">Relationship to the incident <span class="req">*</span></label>
+      <select class="f-connection" id="connection_${seq}">${optionsHTML(CONNECTIONS, 'Select one')}</select>
+    </div>
+    <div class="field"><label for="witness_${seq}">Witnesses (Optional)</label><input class="f-witness" id="witness_${seq}" maxlength="300" placeholder="Names, if known"></div>
+    <div class="field"><label for="details_${seq}">What exactly happened? <span class="req">*</span></label><textarea class="f-details" id="details_${seq}" maxlength="5000" placeholder="Describe the specific incident involving this student..."></textarea></div>
+    <div class="field">
+      <label for="evidence_${seq}">Upload Evidence (Optional)</label>
+      <input type="file" class="f-evidence" id="evidence_${seq}" accept="image/jpeg,image/png,image/webp,application/pdf" multiple>
+      <p class="small">Maximum 3 files. Photos are resized automatically. PDF files must be 5 MB or smaller. JPG, PNG, WEBP or PDF only.</p>
+    </div>
+  `);
+
+  card.querySelector('.f-evidence').addEventListener('change', e => {
+    if (e.target.files.length > MAX_FILES) {
+      alert('You can upload a maximum of ' + MAX_FILES + ' files per student.');
+      e.target.value = '';
+    }
+  });
+  return card;
+}
+
 function renderIndividualDetails() {
-  const container=document.getElementById('individualDetails');
-  container.innerHTML='';
+  const container = $('individualDetails');
 
-  selectedStudents.forEach((studentId,index)=>{
-    const student=classmates.find(s=>s.studentId===studentId);
-    if(!student)return;
-
-    const card=document.createElement('div');
-    card.className='student-card';
-    const heading=document.createElement('h3');
-    heading.textContent='Student '+(index+1)+': '+student.name;
-    card.appendChild(heading);
-
-    const safeId='student_'+index;
-    card.insertAdjacentHTML('beforeend',`
-      <div class="field">
-        <label>Type of Incident</label>
-        <select id="type_${safeId}" multiple size="4">
-          <option value="Verbal Bullying">Verbal Bullying</option>
-          <option value="Physical Bullying">Physical Bullying</option>
-          <option value="Social / Relational Bullying">Social / Relational Bullying</option>
-          <option value="Cyberbullying">Cyberbullying</option>
-          <option value="Other">Other</option>
-        </select>
-        <p class="small">You may select more than one. Hold CTRL while selecting.</p>
-      </div>
-      <div class="grid">
-        <div class="field"><label>Date of Incident</label><input type="date" id="date_${safeId}"></div>
-        <div class="field"><label>Time of Incident</label><input type="time" id="time_${safeId}"></div>
-      </div>
-      <div class="field">
-        <label>Where did it happen?</label>
-        <select id="location_${safeId}">
-          <option value="">Select location</option><option>Classroom</option><option>School Grounds</option>
-          <option>Hallway</option><option>Canteen</option><option>Comfort Room</option>
-          <option>Online / Social Media</option><option>Outside School</option><option>Other</option>
-        </select>
-      </div>
-      <div class="field">
-        <label>How often has this happened?</label>
-        <select id="frequency_${safeId}">
-          <option value="">Select frequency</option><option>Once</option><option>Twice</option>
-          <option>Three to five times</option><option>More than five times</option><option>Happens repeatedly</option>
-        </select>
-      </div>
-      <div class="field">
-        <label>Relationship to the incident</label>
-        <select id="connection_${safeId}">
-          <option value="">Select one</option><option>I personally experienced it</option>
-          <option>I witnessed it</option><option>Someone shared it with me</option>
-        </select>
-      </div>
-      <div class="field"><label>Witnesses (Optional)</label><input id="witness_${safeId}" placeholder="Names, if known"></div>
-      <div class="field"><label>What exactly happened?</label><textarea id="details_${safeId}" placeholder="Describe the specific incident involving this student..."></textarea></div>
-      <div class="field">
-        <label>Upload Evidence (Optional)</label>
-        <input type="file" id="evidence_${safeId}" accept="image/jpeg,image/png,image/webp,application/pdf" multiple>
-        <p class="small">Maximum 3 files, 5 MB each. JPG, PNG, WEBP or PDF.</p>
-      </div>
-    `);
-    container.appendChild(card);
+  [...container.children].forEach(card => {
+    if (!selectedStudents.includes(card.dataset.sid)) card.remove();
+  });
+  selectedStudents.forEach(id => {
+    if (container.querySelector('[data-sid="' + CSS.escape(id) + '"]')) return;
+    const student = classmates.find(s => s.studentId === id);
+    if (student) container.appendChild(buildStudentCard(student));
+  });
+  [...container.children].forEach((card, i) => {
+    const h = card.querySelector('.card-heading');
+    h.textContent = 'Student ' + (i + 1) + ': ' + h.dataset.name;
   });
 }
 
-function fileToBase64(file) {
-  return new Promise((resolve,reject)=>{
-    const reader=new FileReader();
-    reader.onload=()=>resolve({name:file.name,mimeType:file.type,data:reader.result});
-    reader.onerror=reject;
-    reader.readAsDataURL(file);
+/*********************************************************
+ * FILE HANDLING
+ *********************************************************/
+function readAsDataURL(blobOrFile) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = () => reject(new Error('Could not read a selected file.'));
+    reader.readAsDataURL(blobOrFile);
   });
+}
+
+function compressImage(file, maxDim = 1600, quality = 0.8) {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const scale = Math.min(1, maxDim / Math.max(img.width, img.height));
+      const w = Math.max(1, Math.round(img.width * scale));
+      const h = Math.max(1, Math.round(img.height * scale));
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, w, h);
+      ctx.drawImage(img, 0, 0, w, h);
+      canvas.toBlob(async blob => {
+        if (!blob) return reject(new Error('Could not process the image ' + file.name + '.'));
+        try {
+          const data = await readAsDataURL(blob);
+          resolve({name: file.name.replace(/\.[^.]*$/, '') + '.jpg', mimeType: 'image/jpeg', data, size: blob.size});
+        } catch (err) { reject(err); }
+      }, 'image/jpeg', quality);
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Could not open the image ' + file.name + '.')); };
+    img.src = url;
+  });
+}
+
+async function prepareFile(file) {
+  const type = file.type;
+  if (type === 'application/pdf') {
+    if (file.size > MAX_PDF_BYTES) throw new Error(file.name + ' exceeds the 5 MB limit for PDF files.');
+    return {name: file.name, mimeType: type, data: await readAsDataURL(file), size: file.size};
+  }
+  if (['image/jpeg','image/png','image/webp'].includes(type)) {
+    if (file.size > MAX_IMAGE_ORIGINAL_BYTES) throw new Error(file.name + ' is too large (max 25 MB).');
+    return compressImage(file);
+  }
+  throw new Error('Unsupported evidence file type: ' + file.name);
 }
 
 /*********************************************************
  * SUBMIT REPORT
  *********************************************************/
 async function submitIncidentReport() {
-  const narrative=document.getElementById('generalNarrative').value.trim();
-  const urgent=document.getElementById('urgentAlert').checked;
+  clearMessage('reportMessage');
+  const btn = $('submitReportBtn');
+  const narrative = $('generalNarrative').value.trim();
+  const urgent = $('urgentAlert').checked;
 
-  if(selectedStudents.length===0)return message('reportMessage','Select at least one student.');
-  if(narrative.length<5)return message('reportMessage','Please describe your concern.');
+  if (narrative.length < 5) return message('reportMessage', 'Please describe your concern.');
+  if (selectedStudents.length === 0) return message('reportMessage', 'Select at least one student.');
 
-  const targets=[];
-  const btn=document.querySelector('#studentScreen .card > button');
-
+  setLoading(btn, true, 'Preparing report...');
   try {
-    for(let index=0;index<selectedStudents.length;index++){
-      const studentId=selectedStudents[index];
-      const safeId='student_'+index;
-      const details=document.getElementById('details_'+safeId).value.trim();
-      if(!details)throw new Error('Complete the incident details for every selected student.');
+    const targets = [];
+    let totalBytes = 0;
 
-      const types=Array.from(document.getElementById('type_'+safeId).selectedOptions).map(o=>o.value);
-      const fileInput=document.getElementById('evidence_'+safeId);
-      if(fileInput.files.length>3)throw new Error('Maximum of 3 evidence files per student.');
+    for (const studentId of selectedStudents) {
+      const card = $('individualDetails').querySelector('[data-sid="' + CSS.escape(studentId) + '"]');
+      if (!card) throw new Error('Please reselect the students and try again.');
+      const name = card.querySelector('.card-heading').dataset.name;
 
-      const evidence=[];
-      for(const file of fileInput.files){
-        if(file.size>5*1024*1024)throw new Error(file.name+' exceeds the 5 MB limit.');
-        if(!['image/jpeg','image/png','image/webp','application/pdf'].includes(file.type))
-          throw new Error('Unsupported evidence file type: '+file.name);
-        evidence.push(await fileToBase64(file));
+      const types = [...card.querySelectorAll('.f-type:checked')].map(x => x.value);
+      const date = card.querySelector('.f-date').value;
+      const location = card.querySelector('.f-location').value;
+      const frequency = card.querySelector('.f-frequency').value;
+      const connection = card.querySelector('.f-connection').value;
+      const details = card.querySelector('.f-details').value.trim();
+
+      if (!types.length) throw new Error(name + ': select the type of incident.');
+      if (!date) throw new Error(name + ': enter the date of the incident.');
+      if (date > todayLocal()) throw new Error(name + ': the date cannot be in the future.');
+      if (!location) throw new Error(name + ': select where it happened.');
+      if (!frequency) throw new Error(name + ': select how often it happened.');
+      if (!connection) throw new Error(name + ': select your relationship to the incident.');
+      if (details.length < 5) throw new Error(name + ': describe what exactly happened.');
+
+      const files = [...card.querySelector('.f-evidence').files];
+      if (files.length > MAX_FILES) throw new Error(name + ': maximum of ' + MAX_FILES + ' evidence files.');
+
+      const evidence = [];
+      for (const file of files) {
+        const prepared = await prepareFile(file);
+        totalBytes += prepared.size;
+        if (totalBytes > MAX_TOTAL_BYTES) throw new Error('Total evidence size is too large. Upload fewer or smaller files.');
+        evidence.push({name: prepared.name, mimeType: prepared.mimeType, data: prepared.data});
       }
 
       targets.push({
-        targetStudentId:studentId,
-        bullyingTypes:types,
-        incidentDate:document.getElementById('date_'+safeId).value,
-        incidentTime:document.getElementById('time_'+safeId).value,
-        location:document.getElementById('location_'+safeId).value,
-        frequency:document.getElementById('frequency_'+safeId).value,
-        schoolConnection:document.getElementById('connection_'+safeId).value,
-        witnesses:document.getElementById('witness_'+safeId).value,
-        incidentDetails:details,
+        targetStudentId: studentId,
+        bullyingTypes: types,
+        incidentDate: date,
+        incidentTime: card.querySelector('.f-time').value,
+        location, frequency,
+        schoolConnection: connection,
+        witnesses: card.querySelector('.f-witness').value.trim(),
+        incidentDetails: details,
         evidence
       });
     }
 
-    setLoading(btn,true,'Submitting report...');
-    const result=await api('submitReport',{narrative,urgentAlert:urgent,targets});
+    setLoading(btn, true, 'Submitting report...');
+    const result = await api('submitReport', {narrative, urgentAlert: urgent, targets}, 150000);
 
-    message('reportMessage',(result.message||'Report submitted.')+' Reference: '+result.reportId,true);
-    document.getElementById('generalNarrative').value='';
-    document.getElementById('urgentAlert').checked=false;
-    document.getElementById('classmateSearch').value='';
-    selectedStudents=[];
+    $('generalNarrative').value = '';
+    $('urgentAlert').checked = false;
+    $('classmateSearch').value = '';
+    selectedStudents = [];
     renderClassmates();
-  } catch(error) {
-    message('reportMessage',error.message);
+    message('reportMessage', (result.message || 'Report submitted.') + ' Reference: ' + result.reportId, true);
+  } catch (error) {
+    message('reportMessage', error.message);
   } finally {
-    setLoading(btn,false);
+    setLoading(btn, false);
   }
 }
 
 /*********************************************************
  * ADVISER NAVIGATION
  *********************************************************/
-function showAdminPage(page,button) {
-  ['adminOverview','adminReports','adminRegistrations'].forEach(id=>document.getElementById(id).classList.add('hidden'));
-  const map={overview:'adminOverview',reports:'adminReports',registrations:'adminRegistrations'};
-  document.getElementById(map[page]).classList.remove('hidden');
-  document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));
-  if(button)button.classList.add('active');
+function showAdminPage(page) {
+  const map = {overview:'adminOverview', reports:'adminReports', registrations:'adminRegistrations', students:'adminStudents'};
+  Object.values(map).forEach(id => $(id).classList.add('hidden'));
+  $(map[page]).classList.remove('hidden');
+  document.querySelectorAll('.nav button').forEach(b => b.classList.toggle('active', b.dataset.page === page));
+  if (page === 'students') loadStudents();
 }
 
 /*********************************************************
@@ -627,106 +870,189 @@ function showAdminPage(page,button) {
  *********************************************************/
 async function loadDashboard() {
   try {
-    dashboardData=await api('adminDashboard');
-    const s=dashboardData.summary;
-    document.getElementById('totalReports').textContent=s.totalReports;
-    document.getElementById('urgentReports').textContent=s.urgentReports;
-    document.getElementById('newReports').textContent=s.newReports;
-    document.getElementById('pendingCount').textContent=s.pendingRegistrations;
-    renderRanking('mostReported',dashboardData.mostReportedStudents||[]);
-    renderRanking('frequentReporters',dashboardData.frequentReporters||[]);
+    dashboardData = await api('adminDashboard');
+    const s = dashboardData.summary;
+    $('totalReports').textContent = s.totalReports;
+    $('urgentReports').textContent = s.urgentReports;
+    $('newReports').textContent = s.newReports;
+    $('pendingCount').textContent = s.pendingRegistrations;
+    renderRanking('mostReported', dashboardData.mostReportedStudents || []);
+    renderRanking('frequentReporters', dashboardData.frequentReporters || []);
     renderReports();
-  } catch(error){alert(error.message);}
+  } catch (error) { reportError(error); }
 }
-function renderRanking(elementId,data) {
-  const container=document.getElementById(elementId);
-  container.innerHTML='';
-  if(!data.length){container.textContent='No records available.';return;}
-  const max=Math.max(...data.map(x=>Number(x.count)||0),1);
-  data.forEach((item,index)=>{
-    const row=document.createElement('div');
-    const line=document.createElement('div');
-    line.className='list-item';
-    const name=document.createElement('span');
-    name.textContent=(index+1)+'. '+item.name;
-    const count=document.createElement('strong');
-    count.textContent=item.count;
-    line.append(name,count);
-    const progress=document.createElement('div');
-    progress.className='progress';
-    const fill=document.createElement('div');
-    fill.style.width=((Number(item.count)||0)/max*100)+'%';
+
+function renderRanking(elementId, data) {
+  const container = $(elementId);
+  container.innerHTML = '';
+  if (!data.length) { container.textContent = 'No records available.'; return; }
+  const max = Math.max(...data.map(x => Number(x.count) || 0), 1);
+  data.forEach((item, index) => {
+    const row = document.createElement('div');
+    const line = document.createElement('div');
+    line.className = 'list-item';
+    const name = document.createElement('span');
+    name.textContent = (index + 1) + '. ' + item.name;
+    const count = document.createElement('strong');
+    count.textContent = item.count;
+    line.append(name, count);
+    const progress = document.createElement('div');
+    progress.className = 'progress';
+    const fill = document.createElement('div');
+    fill.style.width = ((Number(item.count) || 0) / max * 100) + '%';
     progress.appendChild(fill);
-    row.append(line,progress);
+    row.append(line, progress);
     container.appendChild(row);
   });
 }
+
 function renderReports() {
-  if(!dashboardData)return;
-  const search=(document.getElementById('reportSearch')?.value||'').toLowerCase();
-  const body=document.getElementById('reportsTable');
-  body.innerHTML='';
-  const reports=(dashboardData.reports||[]).filter(r=>
-    String(r.reportId).toLowerCase().includes(search)||
-    String(r.reporterName).toLowerCase().includes(search)
-  );
-  if(!reports.length){body.innerHTML='<tr><td colspan="7">No reports found.</td></tr>';return;}
-  reports.forEach(r=>{
-    const tr=document.createElement('tr');
-    const date=r.submittedAt?new Date(r.submittedAt).toLocaleString():'';
-    const cells=[
-      escapeHTML(r.reportId),escapeHTML(date),escapeHTML(r.reporterName),
+  if (!dashboardData) return;
+  const search = ($('reportSearch').value || '').toLowerCase();
+  const filter = $('reportFilter').value;
+  const body = $('reportsTable');
+  body.innerHTML = '';
+
+  const reports = (dashboardData.reports || []).filter(r => {
+    const matchesSearch = String(r.reportId).toLowerCase().includes(search) ||
+      String(r.reporterName).toLowerCase().includes(search);
+    const matchesFilter = filter === 'all' ? true : filter === 'urgent' ? r.urgentAlert === true : r.status === filter;
+    return matchesSearch && matchesFilter;
+  });
+
+  if (!reports.length) { body.innerHTML = '<tr><td colspan="7">No reports found.</td></tr>'; return; }
+
+  reports.forEach(r => {
+    const tr = document.createElement('tr');
+    const cells = [
+      escapeHTML(r.reportId), escapeHTML(fmtDate(r.submittedAt)), escapeHTML(r.reporterName),
       escapeHTML(r.targetCount),
-      r.urgentAlert?'<span class="badge badge-red">URGENT</span>':'<span class="badge">Regular</span>',
-      escapeHTML(r.status)
+      r.urgentAlert ? '<span class="badge badge-red">URGENT</span>' : '<span class="badge">Regular</span>',
+      escapeHTML(statusLabel(r.status))
     ];
-    cells.forEach(html=>{
-      const td=document.createElement('td');
-      td.innerHTML=html;
+    cells.forEach(html => {
+      const td = document.createElement('td');
+      td.innerHTML = html;
       tr.appendChild(td);
     });
-    const action=document.createElement('td');
-    const view=document.createElement('button');
-    view.className='btn';view.textContent='View';
-    view.addEventListener('click',()=>openReport(r.reportId));
-    action.appendChild(view);tr.appendChild(action);
+    const action = document.createElement('td');
+    const view = document.createElement('button');
+    view.type = 'button';
+    view.className = 'btn btn-small';
+    view.textContent = 'View';
+    view.addEventListener('click', () => openReport(r.reportId));
+    action.appendChild(view);
+    tr.appendChild(action);
     body.appendChild(tr);
   });
 }
 
 /*********************************************************
  * REGISTRATION APPROVAL
+ * May babala kapag hindi mukhang tugma ang pangalang tinype
+ * ng estudyante sa masterlist.
  *********************************************************/
 async function loadPending() {
   try {
-    const pending=await api('adminPending');
-    const container=document.getElementById('pendingList');
-    container.innerHTML='';
-    if(!pending.length){container.textContent='No pending registrations.';return;}
-    pending.forEach(student=>{
-      const card=document.createElement('div');card.className='student-card';
-      const title=document.createElement('h3');title.textContent=student.name;
-      const info=document.createElement('p');
-      info.textContent='LRN: '+student.lrn+' | '+student.grade+' | '+student.section;
-      const approve=document.createElement('button');
-      approve.className='btn btn-green';approve.textContent='Approve';
-      approve.onclick=()=>approveStudent(student.lrn);
-      const reject=document.createElement('button');
-      reject.className='btn btn-danger';reject.style.marginLeft='8px';reject.textContent='Reject';
-      reject.onclick=()=>rejectStudent(student.lrn);
-      card.append(title,info,approve,reject);container.appendChild(card);
+    const pending = await api('adminPending');
+    const container = $('pendingList');
+    container.innerHTML = '';
+    if (!pending.length) { container.textContent = 'No pending registrations.'; return; }
+    pending.forEach(student => {
+      const card = document.createElement('div');
+      card.className = 'student-card';
+      const title = document.createElement('h3');
+      title.textContent = student.name;
+      const info = document.createElement('p');
+      info.textContent = 'LRN: ' + student.lrn + ' | ' + student.grade + ' | ' + student.section +
+        (student.submittedAt ? ' | Requested: ' + fmtDate(student.submittedAt) : '');
+
+      const typed = document.createElement('p');
+      typed.className = 'small';
+      typed.textContent = 'Name typed by student: ' + (student.submittedName || '—');
+      if (!student.nameMatch) {
+        typed.style.color = '#991b1b';
+        typed.style.fontWeight = '700';
+        typed.textContent += '  ⚠ Hindi mukhang tugma sa masterlist. Kumpirmahin muna bago i-approve.';
+      }
+
+      const approve = document.createElement('button');
+      approve.type = 'button';
+      approve.className = 'btn btn-green';
+      approve.textContent = 'Approve';
+      approve.onclick = () => approveStudent(student.lrn);
+      const reject = document.createElement('button');
+      reject.type = 'button';
+      reject.className = 'btn btn-danger';
+      reject.style.marginLeft = '8px';
+      reject.textContent = 'Reject';
+      reject.onclick = () => rejectStudent(student.lrn);
+      card.append(title, info, typed, approve, reject);
+      container.appendChild(card);
     });
-  } catch(error){alert(error.message);}
+  } catch (error) { reportError(error); }
 }
+
 async function approveStudent(lrn) {
-  if(!confirm('Approve this student account?'))return;
-  try{await api('adminApprove',{lrn});await loadPending();await loadDashboard();alert('Student approved.');}
-  catch(error){alert(error.message);}
+  if (!confirm('Approve this student account?')) return;
+  try { await api('adminApprove', {lrn}); await loadPending(); await loadDashboard(); alert('Student approved.'); }
+  catch (error) { reportError(error); }
 }
 async function rejectStudent(lrn) {
-  if(!confirm('Reject this registration?'))return;
-  try{await api('adminReject',{lrn});await loadPending();await loadDashboard();alert('Registration rejected.');}
-  catch(error){alert(error.message);}
+  if (!confirm('Reject this registration?')) return;
+  try { await api('adminReject', {lrn}); await loadPending(); await loadDashboard(); alert('Registration rejected.'); }
+  catch (error) { reportError(error); }
+}
+
+/*********************************************************
+ * STUDENT ACCOUNTS (password reset)
+ *********************************************************/
+async function loadStudents() {
+  try {
+    const list = await api('adminStudents');
+    const body = $('studentsTable');
+    body.innerHTML = '';
+    if (!list.length) { body.innerHTML = '<tr><td colspan="5">No student accounts yet.</td></tr>'; return; }
+    list.forEach(s => {
+      const tr = document.createElement('tr');
+      [s.name, s.lrn, s.status, fmtDate(s.lastLogin) || '—'].forEach(text => {
+        const td = document.createElement('td');
+        td.textContent = text;
+        tr.appendChild(td);
+      });
+      const action = document.createElement('td');
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'btn btn-secondary btn-small';
+      btn.textContent = 'Reset Password';
+      btn.onclick = () => resetStudentPassword(s);
+      action.appendChild(btn);
+      tr.appendChild(action);
+      body.appendChild(tr);
+    });
+  } catch (error) { reportError(error); }
+}
+
+async function resetStudentPassword(student) {
+  if (!confirm('Create a new temporary password for ' + student.name + '? Their old password will stop working.')) return;
+  try {
+    const result = await api('adminResetPassword', {lrn: student.lrn});
+    const box = $('resetResult');
+    box.innerHTML = '';
+    const div = document.createElement('div');
+    div.className = 'temp-box';
+    const text = document.createElement('div');
+    text.textContent = 'Temporary password for ' + student.name + ': ';
+    const code = document.createElement('code');
+    code.textContent = result.temporaryPassword;
+    text.appendChild(code);
+    const note = document.createElement('div');
+    note.className = 'small';
+    note.textContent = 'Give this to the student privately. It is shown only once, and they must change it when they log in.';
+    div.append(text, note);
+    box.appendChild(div);
+    box.scrollIntoView({block: 'nearest', behavior: 'smooth'});
+  } catch (error) { reportError(error); }
 }
 
 /*********************************************************
@@ -734,119 +1060,107 @@ async function rejectStudent(lrn) {
  *********************************************************/
 async function openReport(reportId) {
   try {
-    const result=await api('adminGetReport',{reportId});
-    const r=result.report;
-    const container=document.getElementById('reportDetailContent');
+    const result = await api('adminGetReport', {reportId});
+    const r = result.report;
+    const container = $('reportDetailContent');
     showOnly('reportDetailScreen');
 
-    let html=`
+    let html = `
       <div class="notice">
         <strong>Report Reference:</strong> ${escapeHTML(r.reportId)}<br>
-        <strong>Submitted:</strong> ${escapeHTML(r.submittedAt)}<br>
+        <strong>Submitted:</strong> ${escapeHTML(fmtDate(r.submittedAt))}<br>
         <strong>Reporter:</strong> ${escapeHTML(r.reporterName)}<br>
-        <strong>Priority:</strong> ${r.urgentAlert?'URGENT':'Regular'}
+        <strong>Priority:</strong> ${r.urgentAlert ? 'URGENT' : 'Regular'}
       </div>
-      <h3>General Description</h3><p>${escapeHTML(r.narrative)}</p><hr>
+      <h3>General Description</h3><p style="white-space:pre-wrap">${escapeHTML(r.narrative)}</p><hr>
       <h3>Individual Student Details</h3>
     `;
 
-    (result.targets||[]).forEach((t,index)=>{
-      html+=`
+    (result.targets || []).forEach((t, index) => {
+      html += `
         <div class="student-card">
-          <h3>${index+1}. ${escapeHTML(t.targetName)}</h3>
+          <h3>${index + 1}. ${escapeHTML(t.targetName)}</h3>
           <p><strong>Type:</strong> ${escapeHTML(t.bullyingTypes)}</p>
           <p><strong>Date:</strong> ${escapeHTML(t.incidentDate)}</p>
-          <p><strong>Time:</strong> ${escapeHTML(t.incidentTime)}</p>
+          <p><strong>Time:</strong> ${escapeHTML(t.incidentTime || '—')}</p>
           <p><strong>Location:</strong> ${escapeHTML(t.location)}</p>
           <p><strong>Frequency:</strong> ${escapeHTML(t.frequency)}</p>
           <p><strong>Relationship:</strong> ${escapeHTML(t.schoolConnection)}</p>
-          <p><strong>Witnesses:</strong> ${escapeHTML(t.witnesses)}</p>
-          <p><strong>Details:</strong></p><p>${escapeHTML(t.incidentDetails)}</p>
+          <p><strong>Witnesses:</strong> ${escapeHTML(t.witnesses || '—')}</p>
+          <p><strong>Details:</strong></p><p style="white-space:pre-wrap">${escapeHTML(t.incidentDetails)}</p>
           <div id="evidence_${index}"></div>
         </div>
       `;
     });
 
-    html+=`
+    html += `
       <hr><h3>Adviser Actions</h3>
       <div class="field">
-        <label>Update Report Status</label>
+        <label for="detailStatus">Update Report Status</label>
         <select id="detailStatus">
-          <option ${r.status==='Bago'?'selected':''}>Bago</option>
-          <option ${r.status==='Sinusuri'?'selected':''}>Sinusuri</option>
-          <option ${r.status==='May Aksyon'?'selected':''}>May Aksyon</option>
-          <option ${r.status==='Sarado'?'selected':''}>Sarado</option>
+          ${STATUSES.map(s => `<option value="${escapeHTML(s)}" ${r.status === s ? 'selected' : ''}>${escapeHTML(statusLabel(s))}</option>`).join('')}
         </select>
       </div>
-      <div class="field"><label>Private Adviser Notes</label><textarea id="detailNotes">${escapeHTML(r.staffNotes)}</textarea></div>
-      <button class="btn" id="saveReportButton">Save Changes</button>
+      <div class="field"><label for="detailNotes">Private Adviser Notes</label><textarea id="detailNotes" maxlength="10000">${escapeHTML(r.staffNotes)}</textarea></div>
+      <button type="button" class="btn" id="saveReportButton">Save Changes</button>
     `;
-    container.innerHTML=html;
-    document.getElementById('saveReportButton').onclick=()=>saveReportActions(r.reportId);
+    container.innerHTML = html;
+    $('saveReportButton').onclick = () => saveReportActions(r.reportId);
 
-    (result.targets||[]).forEach((t,index)=>{
-      const box=document.getElementById('evidence_'+index);
-      if(!t.evidenceFileIDs?.length){box.textContent='No evidence attached.';return;}
-      t.evidenceFileIDs.forEach(fileId=>{
-        const btn=document.createElement('button');
-        btn.className='btn btn-secondary';btn.style.margin='5px';btn.textContent='View Evidence';
-        btn.onclick=()=>viewEvidence(r.reportId,fileId);
+    (result.targets || []).forEach((t, index) => {
+      const box = $('evidence_' + index);
+      if (!t.evidenceFileIDs || !t.evidenceFileIDs.length) { box.textContent = 'No evidence attached.'; return; }
+      t.evidenceFileIDs.forEach((fileId, n) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'btn btn-secondary btn-small';
+        btn.style.margin = '5px 5px 5px 0';
+        btn.textContent = 'View Evidence ' + (n + 1);
+        btn.onclick = () => viewEvidence(r.reportId, fileId);
         box.appendChild(btn);
       });
     });
-  } catch(error){alert(error.message);}
+  } catch (error) { reportError(error); }
 }
+
 function closeReportDetails() {
   showOnly('adminScreen');
-  showAdminPage('reports',document.querySelectorAll('.nav button')[1]);
+  showAdminPage('reports');
   loadDashboard();
 }
 
 /*********************************************************
  * EVIDENCE VIEWER
+ * Binubuksan agad ang window sa mismong click para hindi ma-block ng popup blocker.
  *********************************************************/
-async function viewEvidence(reportId,fileId) {
+async function viewEvidence(reportId, fileId) {
+  const win = window.open('', '_blank');
+  if (!win) { alert('Please allow pop-ups to view evidence.'); return; }
+  win.opener = null;
+  win.document.body.textContent = 'Loading evidence...';
   try {
-    const result=await api('adminGetEvidence',{reportId,fileId});
-    const dataURL='data:'+result.mimeType+';base64,'+result.data;
-    const win=window.open();
-    if(!win)throw new Error('Please allow pop-ups to view evidence.');
-    if(result.mimeType==='application/pdf'){
-      const iframe=win.document.createElement('iframe');
-      iframe.src=dataURL;iframe.style.cssText='width:100%;height:100%;border:0';
-      win.document.body.style.margin='0';win.document.body.appendChild(iframe);
-    } else {
-      const image=win.document.createElement('img');
-      image.src=dataURL;image.style.maxWidth='100%';image.style.height='auto';
-      win.document.body.style.margin='0';win.document.body.appendChild(image);
-    }
-  } catch(error){alert(error.message);}
+    const result = await api('adminGetEvidence', {reportId, fileId}, 90000);
+    const bytes = Uint8Array.from(atob(result.data), c => c.charCodeAt(0));
+    const blob = new Blob([bytes], {type: result.mimeType});
+    win.location.href = URL.createObjectURL(blob);
+  } catch (error) {
+    win.close();
+    reportError(error);
+  }
 }
 
 /*********************************************************
  * SAVE ADVISER ACTIONS
  *********************************************************/
 async function saveReportActions(reportId) {
-  const status=document.getElementById('detailStatus').value;
-  const notes=document.getElementById('detailNotes').value;
+  const btn = $('saveReportButton');
+  setLoading(btn, true, 'Saving...');
   try {
-    await api('adminUpdateStatus',{reportId,status});
-    await api('adminUpdateNotes',{reportId,notes});
+    await api('adminUpdateReport', {reportId, status: $('detailStatus').value, notes: $('detailNotes').value});
     alert('Report updated successfully.');
     await loadDashboard();
-  } catch(error){alert(error.message);}
-}
-
-/*********************************************************
- * LOGOUT
- *********************************************************/
-async function logout() {
-  try{if(token)await api('logout');}catch(error){}
-  token='';currentRole='';currentStudentName='';
-  classmates=[];selectedStudents=[];dashboardData=null;
-  document.getElementById('loginPassword').value='';
-  document.getElementById('adminPassword').value='';
-  showOnly('authScreen');showAuth('login');
+  } catch (error) { reportError(error); }
+  finally { setLoading(btn, false); }
 }
 
 showOnly('authScreen');
